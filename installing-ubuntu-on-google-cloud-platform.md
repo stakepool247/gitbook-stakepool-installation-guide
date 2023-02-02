@@ -18,7 +18,7 @@ Now navigate from the main menu to **VM Instances** dashboard: **(Main Menu --> 
 
 **Click on "Create"**
 
-![](<.gitbook/assets/CleanShot 2020-08-08 at 12.44.24@2x (1).png>)
+![](<.gitbook/assets/CleanShot 2020-08-08 at 12.44.24@2x.png>)
 
 Let's name our server (VM instance): **cardano-core**
 

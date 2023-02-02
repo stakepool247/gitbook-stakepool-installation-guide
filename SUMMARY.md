@@ -9,7 +9,7 @@
 ***
 
 * [Adding SWAP (virtual ) memory](adding-swap-virtual-memory.md)
-* [Getting ready to install the Cardano Node (v1.35.5)](cardano-node-prerequisites.md)
+* [Getting ready to install the Cardano Node (v1.35.4)](cardano-node-prerequisites.md)
 * [Cardano Node Installation process](cardano-node-installation-process.md)
 
 ## Cardano Relay Configuration <a href="#cardano-node-configuration" id="cardano-node-configuration"></a>

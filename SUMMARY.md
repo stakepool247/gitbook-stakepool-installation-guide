@@ -1,6 +1,6 @@
 # Table of contents
 
-* [Cardano Node 1.35.4](README.md)
+* [Cardano Node 1.35.5](README.md)
 
 ## Installation Guide (Ubuntu / Debian) <a href="#cardano-node-installation-and-configuration-guide" id="cardano-node-installation-and-configuration-guide"></a>
 

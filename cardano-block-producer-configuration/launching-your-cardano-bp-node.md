@@ -87,7 +87,7 @@ sudo systemctl restart cardano-node.service
 
 
 
-![](../.gitbook/assets/image.png)
+![](<../.gitbook/assets/image (3).png>)
 
 you can check the cardano nodes live logfile using journalctl
 

@@ -103,7 +103,7 @@ journalctl -u cardano-node.service -f -o cat
 
 Ideally, for each core server, you would have 2 relay servers where they can connect
 
-![](<../.gitbook/assets/image (23).png>)
+![](<../.gitbook/assets/image (1).png>)
 
 ****
 

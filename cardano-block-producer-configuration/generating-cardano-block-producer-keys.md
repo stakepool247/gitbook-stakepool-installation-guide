@@ -16,7 +16,7 @@ With SPOS scripts this task is a super easy task:
 ls -al myPool*
 ```
 
-![](<../.gitbook/assets/image (20).png>)
+![](<../.gitbook/assets/image (21).png>)
 
 Now you have generated your pool keys!&#x20;
 
@@ -28,7 +28,7 @@ Now you have generated your pool keys!&#x20;
 
 This command will generate a template that you have to fill in so we can generate a valid pool certificate
 
-![](<../.gitbook/assets/image (30).png>)
+![](<../.gitbook/assets/image (18).png>)
 
 ```
 nano myPool.pool.json 
@@ -45,7 +45,7 @@ I'm creating a **single owner pool** with the following configuration:
 * **main metadata** file will be stored at the following url: [https://www.stakepool247.eu/xpool-testnet.metadata.json](https://www.stakepool247.eu/xpool-testnet.metadata.json)****
 * **extended metadata** (used by adapools, pooltool, and other services): [https://www.stakepool247.eu/xpool-testnet.extended.json](https://www.stakepool247.eu/xpool-testnet.extended.json)
 
-![](<../.gitbook/assets/image (15).png>)
+![](<../.gitbook/assets/image (8).png>)
 
 Let's run again the same command
 
@@ -53,7 +53,7 @@ Let's run again the same command
 05a_genStakepoolCert.sh myPool
 ```
 
-![](<../.gitbook/assets/image (13).png>)
+![](<../.gitbook/assets/image (10).png>)
 
 as we previously didn't have an **extended metadata file,** the script created a template, which we will edit and re-run the command once again.&#x20;
 
@@ -63,7 +63,7 @@ as we previously didn't have an **extended metadata file,** the script created a
 
 edit it so it corresponds to your needs, this file is just for additional information.
 
-![](<../.gitbook/assets/image (3).png>)
+![](<../.gitbook/assets/image (30).png>)
 
 when you have edited it, let's run the same command again:
 
@@ -71,7 +71,7 @@ when you have edited it, let's run the same command again:
 nano myPool.additional-metadata.json 
 ```
 
-![](<../.gitbook/assets/image (12).png>)
+![](<../.gitbook/assets/image (6).png>)
 
 you will get 2 reminders to upload the 2 generated metadata files (myPool.extended-metadata.jsonmyPool.metadata.json) to your webserver. **This is mandatory for your pool to be visible on Daedalus and other wallets:**
 
@@ -101,7 +101,7 @@ this will generate the **poolOwner.deleg.cert**\
 cat poolOwner.payment.addr 
 ```
 
-![](<../.gitbook/assets/image (9).png>)
+![](<../.gitbook/assets/image (16).png>)
 
 send your pledge to that address and check in few seconds if it has arrived:
 
@@ -109,7 +109,7 @@ send your pledge to that address and check in few seconds if it has arrived:
 01_queryAddress.sh poolOwner.payment
 ```
 
-![](<../.gitbook/assets/image (32).png>)
+![](<../.gitbook/assets/image (13).png>)
 
 Great, fund arrived - let's move forward.
 
@@ -121,8 +121,8 @@ Great, fund arrived - let's move forward.
 05c_regStakepoolCert.sh myPool myWallet
 ```
 
-![](<../.gitbook/assets/image (28).png>)
+![](<../.gitbook/assets/image (5).png>)
 
 So, if you did everything correctly in few minutes (sometimes hours) you will have your freshlly registred pool on Daedalus:
 
-![](<../.gitbook/assets/image (4).png>)
+![](<../.gitbook/assets/image (22).png>)

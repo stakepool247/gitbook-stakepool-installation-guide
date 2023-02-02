@@ -1,8 +1,8 @@
 ---
-description: Cardano Stake Pool installation guide for dummies
+description: Cardano Stake Pool installation guide for dummies (linux)
 ---
 
-# Cardano Node 1.35.4
+# Cardano Node 1.35.5
 
 {% hint style="success" %}
 The guide is updated for **Mainnet** to work with the **latest release: 1.35.4**

@@ -31,4 +31,4 @@
 
 ## Cardano Node Upgrades
 
-* [Upgrade to 1.35.5 from 1.3x.x](cardano-node-upgrades/upgrade-to-1.35.0.md)
+* [Upgrade to 1.35.5 from 1.3x.x](cardano-node-upgrades/upgrade-to-1.35.5.md)

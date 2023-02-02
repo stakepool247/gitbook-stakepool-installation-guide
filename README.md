@@ -7,7 +7,7 @@ description: Cardano Stake Pool installation guide for dummies (linux)
 {% hint style="success" %}
 The guide is updated for **Mainnet** to work with the **latest release: 1.35.5**
 
-**if you are upgrading from a previous version - check the** [**Upgrade guide**](cardano-node-upgrades/upgrade-to-1.35.0.md) **below.**
+**if you are upgrading from a previous version - check the** [**Upgrade guide**](cardano-node-upgrades/upgrade-to-1.35.5.md) **below.**
 {% endhint %}
 
 ***

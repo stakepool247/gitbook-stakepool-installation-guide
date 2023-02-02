@@ -25,16 +25,16 @@ rm -rf /home/cardano/cnode/db
 {% tabs %}
 {% tab title="Mainnet" %}
 ```
-curl -o - https://downloads.csnapshots.io/mainnet/$(curl -s https://downloads.csnapshots.io/mainnet/mainnet-db-snapshot.json| jq -r .[].file_name ) | lz4 -c -d - | tar -x -C /home/cardano/cnode/
+curl -o - https://downloads.csnapshots.io/snapshots/mainnet/$(curl -s https://downloads.csnapshots.io/snapshots/mainnet/mainnet-db-snapshot.json| jq -r .[].file_name ) | lz4 -c -d - | tar -x -C /home/cardano/cnode/
 ```
 {% endtab %}
 
 {% tab title="TestNet" %}
 ```
-curl -o - https://downloads.csnapshots.io/testnet/$(curl -s https://downloads.csnapshots.io/testnet/testnet-db-snapshot.json| jq -r .[].file_name ) | lz4 -c -d - | tar -x -C /home/cardano/cnode/
+curl -o - https://downloads.csnapshots.io/snapshots/testnet/$(curl -s https://downloads.csnapshots.io/snapshots/testnet/testnet-db-snapshot.json| jq -r .[].file_name ) | lz4 -c -d - | tar -x -C /home/cardano/cnode/
 ```
 {% endtab %}
 {% endtabs %}
 
-Wait till it downloads, it could take a while, based on your internet speed. **(Mainnet archive is >50GB; TestNet is >1GB)**
+Wait till it downloads, it could take a while, based on your internet speed. **(Mainnet archive is >50GB; TestNet is <1GB)**
 

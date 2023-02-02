@@ -26,7 +26,7 @@ The guide is updated for **Mainnet** to work with the **latest release: 1.35.5**
 
 * **2-3 Linux servers** (1 block-producing node + 1-2 relay nodes)
   * **OS -** Linux 64-bit (Ubuntu 18.04 LTS, 20.04 LTS; Mint 19.3, 20; Debian 10.3)
-  * **2 vCPU -** 1.6GHz or faster ( recommende 4vCPUs)
+  * **2 vCPU -** 1.6GHz or faster ( recommended 4vCPUs)
   * **16GB** of RAM
   * **100 GB** of disk space (Ideally SSD)
   * **Good internet connection** (at least 10Mbps)

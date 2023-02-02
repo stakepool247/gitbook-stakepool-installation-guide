@@ -1,18 +1,11 @@
 ---
-description: Quick update guide from 1.34.x (or older) to 1.35.0
+description: Quick update guide from 1.34.x (or older) to 1.35.5
 cover: >-
   https://images.unsplash.com/photo-1558494949-ef010cbdcc31?crop=entropy&cs=srgb&fm=jpg&ixid=MnwxOTcwMjR8MHwxfHNlYXJjaHwxfHxzZXJ2ZXJ8ZW58MHx8fHwxNjQ2MTM5ODI1&ixlib=rb-1.2.1&q=85
 coverY: 0
 ---
 
-# Upgrade to 1.35.3 from 1.3x.x
-
-{% hint style="info" %}
-if you are upgrading from older versions (1.29.0 or older) this upgrade will resync/replay all the blocks, so be ready that after the upgrade the node, depending on your server specs, will take some (30min - 2h) time to start.
-{% endhint %}
-
-Quick update guide for SPOs who have the previous version already installed  1.30.x\
-If you are  installing from scratch, then follow the installation guide: [https://cardano-node-installation.stakepool247.eu/](https://cardano-node-installation.stakepool247.eu/)
+# Upgrade to 1.35.5 from 1.3x.x
 
 ### 1. backing up current binaries
 
@@ -79,8 +72,8 @@ git clone https://github.com/input-output-hk/cardano-node.git
 cd cardano-node
 git fetch --all --recurse-submodules --tags
 
-# checking out the 1.35.3 version
-git checkout tags/1.35.3
+# checking out the 1.35.5 version
+git checkout tags/1.35.5
 
 ```
 
@@ -92,6 +85,8 @@ echo "with-compiler: ghc-8.10.7" >> cabal.project.local
 ```
 
 ```
+# let's update cabal
+cabal update
 # now let's compile the code
 cabal build all
 ```
@@ -126,9 +121,9 @@ you should now have similar output:
 
 ![](<../.gitbook/assets/CleanShot 2022-08-28 at 11.41.51@2x.jpg>)
 
-### 5. Updating systemd service file
+### 5. Updating the systemd service file
 
-we need to add Environment variable **LD\_LIBRARY\_PATH** for the node to work correctly.
+we need to add the Environment variable **LD\_LIBRARY\_PATH** for the node to work correctly.
 
 {% tabs %}
 {% tab title="Mainnet" %}

@@ -22,7 +22,6 @@ cd cardano-node
 git fetch --all --recurse-submodules --tags
 
 #git checkout $(curl -s https://api.github.com/repos/input-output-hk/cardano-node/releases/latest| jq .tag_name -r)
-git checkout 1.35.4
 ```
 
 you should see the following output, check if the desired version is selected:

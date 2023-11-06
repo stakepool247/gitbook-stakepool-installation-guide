@@ -40,8 +40,8 @@ After=multi-user.target
 [Service]
 Type=simple
 ExecStart=/home/cardano/.local/bin/cardano-node run \
---config /home/cardano/cnode/config/mainnet-config.json \
---topology /home/cardano/cnode/config/mainnet-topology.json \
+--config /home/cardano/cnode/config/config.json \
+--topology /home/cardano/cnode/config/topology.json \
 --database-path  /home/cardano/cnode/db/  \
 --socket-path  /home/cardano/cnode/sockets/node.socket \
 --host-addr 0.0.0.0 \
@@ -87,7 +87,7 @@ sudo systemctl restart cardano-node.service
 
 
 
-![](<../.gitbook/assets/image (3).png>)
+![](<../.gitbook/assets/image (32).png>)
 
 you can check the cardano nodes live logfile using journalctl
 

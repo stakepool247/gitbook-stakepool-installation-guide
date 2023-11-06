@@ -7,16 +7,16 @@ description: Let's create our pool keys
 With SPOS scripts this task is a super easy task:
 
 ```
-04a_genNodeKeys.sh myPool
-04b_genVRFKeys.sh myPool
-04c_genKESKeys.sh myPool
+04a_genNodeKeys.sh myPool cli
+04b_genVRFKeys.sh myPool cli 
+04c_genKESKeys.sh myPool cli
 04d_genNodeOpCert.sh myPool
 
 # let's see generated files
 ls -al myPool*
 ```
 
-![](<../.gitbook/assets/image (21).png>)
+![](<../.gitbook/assets/image (3).png>)
 
 Now you have generated your pool keys!&#x20;
 
@@ -28,7 +28,7 @@ Now you have generated your pool keys!&#x20;
 
 This command will generate a template that you have to fill in so we can generate a valid pool certificate
 
-![](<../.gitbook/assets/image (18).png>)
+![](<../.gitbook/assets/image (20).png>)
 
 ```
 nano myPool.pool.json 
@@ -42,10 +42,10 @@ I'm creating a **single owner pool** with the following configuration:
 * **2 IP relays**: 89.191.111.111 and 89.191.111.112, both will run on port 3001
 * **Pool's TICKER:** XPOOL
 * **short and long descriptions:** "My Testnet Pool #2",  "This pool is used for the guide i created",
-* **main metadata** file will be stored at the following url: [https://www.stakepool247.eu/xpool-testnet.metadata.json](https://www.stakepool247.eu/xpool-testnet.metadata.json)****
+* **main metadata** file will be stored at the following url: [https://www.stakepool247.eu/xpool-testnet.metadata.json](https://www.stakepool247.eu/xpool-testnet.metadata.json)
 * **extended metadata** (used by adapools, pooltool, and other services): [https://www.stakepool247.eu/xpool-testnet.extended.json](https://www.stakepool247.eu/xpool-testnet.extended.json)
 
-![](<../.gitbook/assets/image (8).png>)
+![](<../.gitbook/assets/image (27).png>)
 
 Let's run again the same command
 
@@ -53,7 +53,7 @@ Let's run again the same command
 05a_genStakepoolCert.sh myPool
 ```
 
-![](<../.gitbook/assets/image (10).png>)
+![](<../.gitbook/assets/image (17).png>)
 
 as we previously didn't have an **extended metadata file,** the script created a template, which we will edit and re-run the command once again.&#x20;
 
@@ -63,7 +63,7 @@ as we previously didn't have an **extended metadata file,** the script created a
 
 edit it so it corresponds to your needs, this file is just for additional information.
 
-![](<../.gitbook/assets/image (30).png>)
+![](<../.gitbook/assets/image (6).png>)
 
 when you have edited it, let's run the same command again:
 
@@ -71,7 +71,7 @@ when you have edited it, let's run the same command again:
 nano myPool.additional-metadata.json 
 ```
 
-![](<../.gitbook/assets/image (6).png>)
+![](../.gitbook/assets/image.png)
 
 you will get 2 reminders to upload the 2 generated metadata files (myPool.extended-metadata.jsonmyPool.metadata.json) to your webserver. **This is mandatory for your pool to be visible on Daedalus and other wallets:**
 
@@ -94,14 +94,14 @@ Let's create a delegation certificate where we will delegate to our own pool
 ```
 
 this will generate the **poolOwner.deleg.cert**\
-****\
+\
 **before proceeding let's honor our pledge and send the pledged amount to poolOwner.paymet address, you can find the address where you have to send your funds in the poolOwner.payment.addr  file**
 
 ```
 cat poolOwner.payment.addr 
 ```
 
-![](<../.gitbook/assets/image (16).png>)
+![](<../.gitbook/assets/image (19).png>)
 
 send your pledge to that address and check in few seconds if it has arrived:
 
@@ -109,7 +109,7 @@ send your pledge to that address and check in few seconds if it has arrived:
 01_queryAddress.sh poolOwner.payment
 ```
 
-![](<../.gitbook/assets/image (13).png>)
+![](<../.gitbook/assets/image (25).png>)
 
 Great, fund arrived - let's move forward.
 
@@ -121,8 +121,8 @@ Great, fund arrived - let's move forward.
 05c_regStakepoolCert.sh myPool myWallet
 ```
 
-![](<../.gitbook/assets/image (5).png>)
+![](<../.gitbook/assets/image (22).png>)
 
 So, if you did everything correctly in few minutes (sometimes hours) you will have your freshlly registred pool on Daedalus:
 
-![](<../.gitbook/assets/image (22).png>)
+![](<../.gitbook/assets/image (18).png>)

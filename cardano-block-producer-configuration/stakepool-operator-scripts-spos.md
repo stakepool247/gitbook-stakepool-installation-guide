@@ -32,7 +32,7 @@ cd
 mkdir -p git
 cd git
 
-# just in case we have already an older folder there - let's remove it
+# just in case we already have an older folder there - let's remove it
 rm -rf scripts
 
 # cloning the code from github
@@ -43,9 +43,9 @@ ls -al
 
 ```
 
-as the result, you should see this
+as a result, you should see this
 
-![](<../.gitbook/assets/CleanShot 2022-06-27 at 17.23.04@2x.jpg>)
+<figure><img src="../.gitbook/assets/CleanShot 2023-05-15 at 20.18.03@2x.jpg" alt=""><figcaption></figcaption></figure>
 
 let's copy the scripts to our bin folder, so we can call them from anywhere:
 
@@ -62,8 +62,8 @@ Now we have to do a simple configuration so the script knows where to find files
 cat <<EOF > ~/.common.inc
 socket="/home/cardano/cnode/sockets/node.socket"
 
-genesisfile="/home/cardano/cnode/config/mainnet-shelley-genesis.json"           #Shelley-Genesis path
-genesisfile_byron="/home/cardano/cnode/config/mainnet-byron-genesis.json"       #Byron-Genesis path
+genesisfile="/home/cardano/cnode/config/shelley-genesis.json"           #Shelley-Genesis path
+genesisfile_byron="/home/cardano/cnode/config/byron-genesis.json"       #Byron-Genesis path
 
 cardanocli="cardano-cli"        #Path to your cardano-cli you wanna use
 cardanonode="cardano-node"      #Path to your cardano-node you wanna use
@@ -121,4 +121,4 @@ Let's check if you have succeeded:
 
 if you see the following output, then you have successfully installed the scripts:
 
-![](<../.gitbook/assets/CleanShot 2022-06-27 at 17.27.32@2x.jpg>)
+<figure><img src="../.gitbook/assets/CleanShot 2023-05-20 at 00.34.31@2x.jpg" alt=""><figcaption></figcaption></figure>

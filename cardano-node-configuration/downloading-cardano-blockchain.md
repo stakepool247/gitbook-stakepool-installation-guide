@@ -36,5 +36,7 @@ curl -o - https://downloads.csnapshots.io/snapshots/testnet/$(curl -s https://do
 {% endtab %}
 {% endtabs %}
 
-Wait till it downloads, it could take a while, based on your internet speed. **(Mainnet archive is >50GB; TestNet is <1GB)**
+<figure><img src="../.gitbook/assets/CleanShot 2023-05-15 at 19.40.38@2x.jpg" alt=""><figcaption></figcaption></figure>
+
+Wait till it downloads, it could take a while, based on your internet speed. **(Mainnet archive is >60GB; TestNet is <1GB)**
 

@@ -23,22 +23,23 @@ We will download the latest default configuration and genesis files from here: &
 
 [https://book.world.dev.cardano.org/environments.html#production-mainnet](https://book.world.dev.cardano.org/environments.html#production-mainnet)
 
-<figure><img src="../.gitbook/assets/CleanShot 2023-02-19 at 10.52.19@2x.jpg" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/CleanShot 2023-05-15 at 19.35.25.jpg" alt=""><figcaption></figcaption></figure>
 
 Let's download them from our server's console**:**
 
 {% tabs %}
 {% tab title="Mainnet" %}
 ```
-#downloading
-curl -o mainnet-config.json https://book.world.dev.cardano.org/environments/mainnet/config.json
-curl -o mainnet-topology.json  https://book.world.dev.cardano.org/environments/mainnet/topology.json
+#downloading configuration files
+curl -o config.json https://book.world.dev.cardano.org/environments/mainnet/config.json
+curl -o topology.json  https://book.world.dev.cardano.org/environments/mainnet/topology.json
 curl -o byron-genesis.json https://book.world.dev.cardano.org/environments/mainnet/byron-genesis.json
 curl -o shelley-genesis.json https://book.world.dev.cardano.org/environments/mainnet/shelley-genesis.json
 curl -o alonzo-genesis.json https://book.world.dev.cardano.org/environments/mainnet/alonzo-genesis.json
+curl -o conway-genesis.json https://book.world.dev.cardano.org/environments/mainnet/conway-genesis.json
 
 #list downloaded files
-ls -al mainnet*
+ls -al *
 
 ```
 {% endtab %}
@@ -46,22 +47,21 @@ ls -al mainnet*
 {% tab title="Testnet (pre-prod)" %}
 ```
 #downloading configs
-wget -q -O testnet-config.json https://book.world.dev.cardano.org/environments/preprod/config.json
-wget -q -O testnet-alonzo-genesis.json https://book.world.dev.cardano.org/environments/preprod/alonzo-genesis.json
-wget -q -O testnet-byron-genesis.json https://book.world.dev.cardano.org/environments/preprod/byron-genesis.json
-wget -q -O testnet-shelley-genesis.json https://book.world.dev.cardano.org/environments/preprod/shelley-genesis.json
-wget -q -O testnet-topology.json https://book.world.dev.cardano.org/environments/preprod/topology.json
-
+wget -q -O config.json https://book.world.dev.cardano.org/environments/preprod/config.json
+wget -q -O alonzo-genesis.json https://book.world.dev.cardano.org/environments/preprod/alonzo-genesis.json
+wget -q -O byron-genesis.json https://book.world.dev.cardano.org/environments/preprod/byron-genesis.json
+wget -q -O shelley-genesis.json https://book.world.dev.cardano.org/environments/preprod/shelley-genesis.json
+wget -q -O topology.json https://book.world.dev.cardano.org/environments/preprod/topology.json
+wget -q -O conway-genesis.json https://book.world.dev.cardano.org/environments/preprod/conway-genesis.json
 #list downloaded files
-ls -al testnet*
-
+ls -al 
 ```
 {% endtab %}
 {% endtabs %}
 
-you should now have 5 files in the config folder:
+you should now have 6 files in the config folder:
 
-![](<../.gitbook/assets/CleanShot 2021-08-30 at 15.17.52.png>)
+<figure><img src="../.gitbook/assets/CleanShot 2023-05-15 at 19.31.18@2x.jpg" alt=""><figcaption></figcaption></figure>
 
 We are almost done - I know that you are eager to test what we have done so far :) So let's test and run our **Node on port 3000**
 
@@ -75,9 +75,7 @@ cardano-node run --database-path /home/cardano/cnode/db --socket-path /home/card
 
 If you followed the guide, you should see this:
 
-![carano node syncing blocks](<../.gitbook/assets/CleanShot 2021-08-30 at 15.22.00.png>)
+<figure><img src="../.gitbook/assets/CleanShot 2023-05-15 at 19.33.13@2x.jpg" alt=""><figcaption></figcaption></figure>
 
-![](<../.gitbook/assets/CleanShot 2020-12-03 at 17.55.11@2x.png>)
-
-great! You can now exit this by pressing <mark style="color:blue;">ctrl+c</mark> and continuing to the next chapter!
+great! The node is syncing! You can now exit this by pressing <mark style="color:blue;">ctrl+c</mark> and continuing to the next chapter!
 

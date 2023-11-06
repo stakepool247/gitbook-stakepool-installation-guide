@@ -20,8 +20,7 @@ You should have now a new folder - _cardano-node_ with the source code of the ca
 ```
 cd cardano-node
 git fetch --all --recurse-submodules --tags
-
-#git checkout $(curl -s https://api.github.com/repos/input-output-hk/cardano-node/releases/latest| jq .tag_name -r)
+git checkout $(curl -s https://api.github.com/repos/input-output-hk/cardano-node/releases/latest| jq .tag_name -r)
 ```
 
 you should see the following output, check if the desired version is selected:
@@ -71,7 +70,7 @@ cardano-cli --version
 
 you should see something like this:
 
-<figure><img src=".gitbook/assets/CleanShot 2022-11-14 at 23.06.35@2x.jpg" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/CleanShot 2023-06-25 at 10.36.17@2x.jpg" alt=""><figcaption></figcaption></figure>
 
 Great! We have installed the Cardano node on our server! \
 

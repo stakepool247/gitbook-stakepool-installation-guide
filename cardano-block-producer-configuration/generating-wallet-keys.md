@@ -19,7 +19,7 @@ ls -al
 
 you should see something like this:
 
-![](../.gitbook/assets/image.png)
+![](<../.gitbook/assets/image (5).png>)
 
 Now let's check the balance of the wallet as well the address of that wallet:
 
@@ -27,7 +27,7 @@ Now let's check the balance of the wallet as well the address of that wallet:
 01_queryAddress.sh myWallet
 ```
 
-![](<../.gitbook/assets/image (20).png>)
+![](<../.gitbook/assets/image (1).png>)
 
 ok, as expected, no funds on that wallet :) \
 check the address of that wallet, in this case it's **(DONT'T SEND FUNDS TO THIS ADDRESS)**: addr\_test1vrl0cagj24t20dcsmljh5n2egg5pehpfmy6wtsul6resl0gpzsp7d&#x20;
@@ -41,7 +41,7 @@ Send the 505 ADA to your freshly created address and then check again the wallet
 
 When you have sent some ADA to your myWallet address, let's check again:
 
-![](<../.gitbook/assets/image (25).png>)
+![](<../.gitbook/assets/image (4).png>)
 
 Now let's create  an address where you will be storing the **pools Pledge**
 
@@ -50,7 +50,7 @@ Now let's create  an address where you will be storing the **pools Pledge**
 ls -al poolOwner*
 ```
 
-![](<../.gitbook/assets/image (11).png>)
+![](<../.gitbook/assets/image (21).png>)
 
 Great, now let's register the owner stake key on the blockchain, **myWallet** will pay for the transaction as well as for the deposit
 
@@ -58,7 +58,7 @@ Great, now let's register the owner stake key on the blockchain, **myWallet** wi
 03b_regStakingAddrCert.sh poolOwner myWallet
 ```
 
-![](<../.gitbook/assets/image (26).png>)
+![](<../.gitbook/assets/image (28).png>)
 
 Now let's check if our stake certificate is registered on blockchain:
 
@@ -66,6 +66,6 @@ Now let's check if our stake certificate is registered on blockchain:
 03c_checkStakingAddrOnChain.sh poolOwner
 ```
 
-![](<../.gitbook/assets/image (14).png>)
+![](<../.gitbook/assets/image (30).png>)
 
 Ok, our primary Wallet and Pledge wallet is ready! Let's create in our next steps the POOL Keys.

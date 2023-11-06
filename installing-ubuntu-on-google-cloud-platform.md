@@ -38,4 +38,3 @@ Let's edit the Machine configuration: choose N1 Server: 2vCPU server with 7,5GB 
 
 **click select, and that's it, we are ready to go:**
 
-****

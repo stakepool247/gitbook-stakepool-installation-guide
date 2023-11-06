@@ -1,10 +1,10 @@
 ---
 description: >-
   Now the most complicated part (not so complicated if you follow this guide :)
-  ) - the installation process!
+  ) - is the installation process!
 ---
 
-# Getting ready to install the Cardano Node (v1.35.4)
+# Getting ready to install the Cardano Node (v8.1.1)
 
 to successfully install (compile) the Carano node, we need to be sure that we have all the necessary ingredients! To get them (install) type the following commands:
 
@@ -20,7 +20,7 @@ export LD_LIBRARY_PATH="/usr/local/lib:$LD_LIBRARY_PATH"
 
 This will install all the necessary software packages for our next steps.
 
-As the Cardano node is using **cabal**, so let's install it as well. We will use the recommended version 3.4.0.0 and install it to our local bin folder (_.local/bin_)
+As the Cardano node is using **cabal**, so let's install it as well. We will use the recommended version **3.6.2.0** and install it to our local bin folder (_.local/bin_)
 
 to install cabal, we will be using **ghcup** (_ghcup_ is an installer for\
 the general-purpose language [Haskell](https://www.haskell.org/)), for more info you can check: [https://www.haskell.org/ghcup/](https://www.haskell.org/ghcup/)&#x20;
@@ -41,7 +41,7 @@ Press **ENTER** to continue
 
 ![](<.gitbook/assets/CleanShot 2021-08-30 at 13.15.55.png>)
 
-**Press ENTER** to proceed with cabal installation
+**Press ENTER** to proceed with the installation
 
 When the installation is finished, you should see the following screen:
 
@@ -53,11 +53,11 @@ let's reload environment variables:&#x20;
 source /home/cardano/.ghcup/env
 ```
 
-Let's install the 3.6.2.0 version and set this one as the default:
+Let's install the 3.8.1.0 version and set this one as the default:
 
 ```
-ghcup install cabal 3.6.2.0
-ghcup set cabal 3.6.2.0
+ghcup install cabal 3.8.1.0
+ghcup set cabal 3.8.1.0
 cabal update
 ```
 
@@ -68,17 +68,17 @@ Let's check which version we have installed
  
 ```
 
-you should see version 3.6.2.0
+you should see version 3.8.1.0
 
-![](<.gitbook/assets/CleanShot 2022-06-27 at 14.39.05@2x.jpg>)
+<figure><img src=".gitbook/assets/CleanShot 2023-06-25 at 09.18.24@2x.jpg" alt=""><figcaption></figcaption></figure>
 
 &#x20;You should now have the cabal installed in _/home/cardano/.ghcup/bin_ folder.
 
-### GHC 8.10.4 installation
+### GHC 8.10.7 installation
 
-Let's move to the next steps - installing GHC - the Haskell code compiler (Cardano node is based on the Haskell programming language).&#x20;
+Let's move to the next step - installing GHC - the Haskell code compiler (Cardano node is based on the Haskell programming language).&#x20;
 
-As we already installed the handy ghcup tool, then this is done super easy:&#x20;
+As we already installed the handy ghcup tool, then this is done super easily:&#x20;
 
 ```
 ghcup install ghc 8.10.7
@@ -112,12 +112,17 @@ let's create a git folder where we will be compiling libsodium library from the 
 mkdir -p ~/git && cd ~/git
 ```
 
-Download and install libsodium library ( we need a specific branch of the library, so follow the guide)
+Download and install libsodium library ( we need a specific branch of the library, so follow the guide)\
+
+
+{% hint style="warning" %}
+Starting from Cardano Node v8.0.0 needs a newer version of libsodium
+{% endhint %}
 
 ```
 git clone https://github.com/input-output-hk/libsodium
 cd libsodium
-git checkout 66f017f1
+git checkout dbb48cc
 ./autogen.sh
 ./configure
 make
@@ -152,6 +157,6 @@ make
 sudo make install
 ```
 
-****
+
 
 Let's move to the next step - the actual installation of Cardano Node!

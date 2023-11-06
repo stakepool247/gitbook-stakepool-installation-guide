@@ -6,7 +6,7 @@ description: >-
 
 # Launching Cardano Relay Node
 
-## Launching cardano-node as system service
+Launching cardano-node as system service
 
 Launching cardano node as a system service is the recommended way to run the process on production servers.
 
@@ -15,23 +15,28 @@ Launching cardano node as a system service is the recommended way to run the pro
 create a **systemd** service configuration file with all the keys and other settings, so the **cardano node process will be running in the background:**
 
 ```
-cat <<EOF | sudo tee -a /etc/systemd/system/cardano-node.service
+cat <<EOF | sudo tee /etc/systemd/system/cardano-node.service
 [Unit]
 Description=Cardano Pool
 After=multi-user.target
 [Service]
 Type=simple
-ExecStart=/home/cardano/.local/bin/cardano-node run --config /home/cardano/cnode/config/mainnet-config.json --topology /home/cardano/cnode/config/mainnet-topology.json --database-path  /home/cardano/cnode/db/ --socket-path  /home/cardano/cnode/sockets/node.socket --host-addr 0.0.0.0 --port 3001    
+ExecStart=/home/cardano/.local/bin/cardano-node run \\
+    --config /home/cardano/cnode/config/config.json \\
+    --topology /home/cardano/cnode/config/topology.json \\
+    --database-path  /home/cardano/cnode/db/ \\
+    --socket-path  /home/cardano/cnode/sockets/node.socket \\
+    --host-addr 0.0.0.0 --port 3001    
 Environment="LD_LIBRARY_PATH=/usr/local/lib"
 KillSignal = SIGINT
 RestartKillSignal = SIGINT
-StandardOutput=syslog
-StandardError=syslog
+StandardOutput=journal
+StandardError=journal
 SyslogIdentifier=cardano
 LimitNOFILE=32768
 
 Restart=on-failure
-RestartSec=45s
+RestartSec=360s
 WorkingDirectory=~
 User=cardano
 Group=cardano
@@ -45,23 +50,28 @@ EOF
 create a **systemd** service configuration file with all the keys and other settings, so the **Cardano node process will be running in the background:**
 
 ```
-cat <<EOF | sudo tee -a /etc/systemd/system/cardano-node.service
+cat <<EOF | sudo tee /etc/systemd/system/cardano-node.service
 [Unit]
 Description=Cardano Pool
 After=multi-user.target
 [Service]
 Type=simple
-ExecStart=/home/cardano/.local/bin/cardano-node run --config /home/cardano/cnode/config/testnet-config.json --topology /home/cardano/cnode/config/testnet-topology.json --database-path  /home/cardano/cnode/db/ --socket-path  /home/cardano/cnode/sockets/node.socket --host-addr 0.0.0.0 --port 3001    
-Environment="LD_LIBRARY_PATH=/usr/local/lib
+ExecStart=/home/cardano/.local/bin/cardano-node run \\
+    --config /home/cardano/cnode/config/config.json \\
+    --topology /home/cardano/cnode/config/topology.json \\
+    --database-path  /home/cardano/cnode/db/ \\
+    --socket-path  /home/cardano/cnode/sockets/node.socket \\
+    --host-addr 0.0.0.0 --port 3001    
+Environment="LD_LIBRARY_PATH=/usr/local/lib"
 KillSignal = SIGINT
 RestartKillSignal = SIGINT
-StandardOutput=syslog
-StandardError=syslog
+StandardOutput=journal
+StandardError=journal
 SyslogIdentifier=cardano
 LimitNOFILE=32768
 
 Restart=on-failure
-RestartSec=45s
+RestartSec=360s
 WorkingDirectory=~
 User=cardano
 Group=cardano
@@ -87,11 +97,7 @@ Now let's check if our cardano node process is running!
 journalctl -u cardano-node.service -f -o cat
 ```
 
-![](<../.gitbook/assets/CleanShot 2022-06-27 at 17.03.48@2x.jpg>)
-
-![](<../.gitbook/assets/CleanShot 2021-08-30 at 15.25.25.png>)
-
-
+<figure><img src="../.gitbook/assets/CleanShot 2023-05-15 at 20.16.13@2x.jpg" alt=""><figcaption></figcaption></figure>
 
 **We have set up your first relay node!** &#x20;
 
@@ -103,13 +109,12 @@ journalctl -u cardano-node.service -f -o cat
 
 Ideally, for each core server, you would have 2 relay servers where they can connect
 
-![](<../.gitbook/assets/image (1).png>)
+![](<../.gitbook/assets/image (11).png>)
 
-****
+
 
 {% hint style="danger" %}
 **NEVER, EVER generate your wallet and stake pool keys on your online servers! It's a BAD, BAD practice. Install on your local machine VirtualBox+Ubuntu and do the wallet and key registration (either by hand or using CNTOOLS or Martins SPOS scripts)**
 {% endhint %}
 
-**if you need any help - you can contact us directly using Telegram:** [**https://t.me/StakePool247help**](https://t.me/StakePool247help) **** \
-****
+**if you need any help - you can contact us directly using Telegram:** [**https://t.me/StakePool247help**](https://t.me/StakePool247help) \

@@ -1,6 +1,6 @@
 # Table of contents
 
-* [Cardano Node 1.35.5](README.md)
+* [Cardano Node 8.1.1](README.md)
 
 ## Installation Guide (Ubuntu / Debian) <a href="#cardano-node-installation-and-configuration-guide" id="cardano-node-installation-and-configuration-guide"></a>
 
@@ -9,7 +9,7 @@
 ***
 
 * [Adding SWAP (virtual ) memory](adding-swap-virtual-memory.md)
-* [Getting ready to install the Cardano Node (v1.35.5)](cardano-node-prerequisites.md)
+* [Getting ready to install the Cardano Node (v8.1.1)](cardano-node-prerequisites.md)
 * [Cardano Node Installation process](cardano-node-installation-process.md)
 
 ## Cardano Relay Configuration <a href="#cardano-node-configuration" id="cardano-node-configuration"></a>
@@ -31,4 +31,4 @@
 
 ## Cardano Node Upgrades
 
-* [Upgrade to 1.35.5 from 1.3x.x](cardano-node-upgrades/upgrade-to-1.35.5.md)
+* [Upgrade to 8.1.1 from 8.0.0](cardano-node-upgrades/upgrade-to-8.1.1.md)

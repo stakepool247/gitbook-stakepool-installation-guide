@@ -6,6 +6,10 @@ description: Install cardano-node/cardano-cli 10.6.2 using official release bina
 
 This section installs **cardano-node 10.6.2** from official GitHub release artifacts.
 
+{% hint style="info" %}
+Path layout is kept compatible with existing SPO setups: `/home/cardano/cnode/{config,db,sockets,keys,logs,scripts}`.
+{% endhint %}
+
 ## 1) Download release artifacts
 
 For **x86_64 / amd64** Linux:
@@ -43,8 +47,8 @@ install -m 755 ./bin/cardano-node ./bin/cardano-cli $HOME/.local/bin/
 If the archive contains `cardano-submit-api` and `cardano-tracer`, you can install them too:
 
 ```bash
-[ -f cardano-submit-api ] && install -m 755 cardano-submit-api $HOME/.local/bin/
-[ -f cardano-tracer ] && install -m 755 cardano-tracer $HOME/.local/bin/
+[ -f ./bin/cardano-submit-api ] && install -m 755 ./bin/cardano-submit-api $HOME/.local/bin/
+[ -f ./bin/cardano-tracer ] && install -m 755 ./bin/cardano-tracer $HOME/.local/bin/
 ```
 
 ## 4) Validate installation
@@ -65,8 +69,8 @@ The release archive already contains current environment configs under `./share/
 Copy mainnet files:
 
 ```bash
-mkdir -p $HOME/cardano/files/mainnet
-cp -r ./share/mainnet/* $HOME/cardano/files/mainnet/
+mkdir -p $HOME/cnode/config/mainnet
+cp -r ./share/mainnet/* $HOME/cnode/config/mainnet/
 ```
 
 If you prefer, you can fetch from Intersect environments page:
@@ -89,14 +93,14 @@ Type=simple
 Restart=always
 RestartSec=5
 LimitNOFILE=1048576
-WorkingDirectory=/home/cardano/cardano
+WorkingDirectory=/home/cardano/cnode
 ExecStart=/home/cardano/.local/bin/cardano-node run \
-  --topology /home/cardano/cardano/files/mainnet/topology.json \
-  --database-path /home/cardano/cardano/db \
-  --socket-path /home/cardano/cardano/ipc/node.socket \
+  --topology /home/cardano/cnode/config/mainnet/topology.json \
+  --database-path /home/cardano/cnode/db \
+  --socket-path /home/cardano/cnode/sockets/node.socket \
   --host-addr 0.0.0.0 \
   --port 6000 \
-  --config /home/cardano/cardano/files/mainnet/config.json
+  --config /home/cardano/cnode/config/mainnet/config.json
 
 [Install]
 WantedBy=multi-user.target
@@ -120,7 +124,7 @@ journalctl -u cardano-node -f
 In another terminal:
 
 ```bash
-cardano-cli query tip --mainnet --socket-path /home/cardano/cardano/ipc/node.socket
+cardano-cli query tip --mainnet --socket-path /home/cardano/cnode/sockets/node.socket
 ```
 
 When `syncProgress` approaches `100`, the node is near tip.

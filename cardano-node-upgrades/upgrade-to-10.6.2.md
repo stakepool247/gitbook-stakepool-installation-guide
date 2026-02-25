@@ -37,7 +37,7 @@ Ensure checksum matches exactly.
 ```bash
 sudo cp -a /home/cardano/.local/bin/cardano-node /home/cardano/.local/bin/cardano-node.bak.$(date +%F-%H%M) || true
 sudo cp -a /home/cardano/.local/bin/cardano-cli /home/cardano/.local/bin/cardano-cli.bak.$(date +%F-%H%M) || true
-cp -a /home/cardano/cardano/files/mainnet /home/cardano/cardano/files/mainnet.bak.$(date +%F-%H%M)
+cp -a /home/cardano/cnode/config/mainnet /home/cardano/cnode/config/mainnet.bak.$(date +%F-%H%M)
 ```
 
 ## 3) Install new binaries
@@ -50,8 +50,8 @@ install -m 755 ./bin/cardano-node ./bin/cardano-cli /home/cardano/.local/bin/
 ## 4) Refresh mainnet config bundle
 
 ```bash
-mkdir -p /home/cardano/cardano/files/mainnet
-cp -r ./share/mainnet/* /home/cardano/cardano/files/mainnet/
+mkdir -p /home/cardano/cnode/config/mainnet
+cp -r ./share/mainnet/* /home/cardano/cnode/config/mainnet/
 ```
 
 ## 5) Restart node
@@ -69,7 +69,7 @@ sudo systemctl status cardano-node --no-pager
 cardano-node --version
 cardano-cli --version
 journalctl -u cardano-node -n 100 --no-pager
-cardano-cli query tip --mainnet --socket-path /home/cardano/cardano/ipc/node.socket
+cardano-cli query tip --mainnet --socket-path /home/cardano/cnode/sockets/node.socket
 ```
 
 ## 7) Rollback (if needed)

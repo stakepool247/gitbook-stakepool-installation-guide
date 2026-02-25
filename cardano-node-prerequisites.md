@@ -26,7 +26,12 @@ Run as your `cardano` user:
 
 ```bash
 mkdir -p $HOME/.local/bin
-mkdir -p $HOME/cardano/{db,ipc,logs,files,scripts}
+
+# canonical cnode layout (kept for compatibility with existing users)
+cd $HOME
+mkdir -p cnode
+cd cnode
+mkdir -p config db sockets keys logs scripts
 
 grep -q 'export PATH="$HOME/.local/bin:$PATH"' $HOME/.bashrc || \
   echo 'export PATH="$HOME/.local/bin:$PATH"' >> $HOME/.bashrc

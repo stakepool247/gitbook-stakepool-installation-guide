@@ -33,3 +33,9 @@
 
 * [Upgrade to 10.6.2 (recommended)](cardano-node-upgrades/upgrade-to-10.6.2.md)
 * [Legacy: upgrade to 8.7.2 from 8.0.0](cardano-node-upgrades/upgrade-to-8.1.1.md)
+
+## Legacy Guides (Archive)
+
+* [Cardano Node 9.2.1 (archive)](legacy/cardano-node-9.2.1/README.md)
+* [9.2.1 Prerequisites (archive)](legacy/cardano-node-9.2.1/cardano-node-prerequisites.md)
+* [9.2.1 Installation process (archive)](legacy/cardano-node-9.2.1/cardano-node-installation-process.md)

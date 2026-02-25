@@ -31,4 +31,5 @@
 
 ## Cardano Node Upgrades
 
-* [Upgrade to 8.7.2 from 8.0.0](cardano-node-upgrades/upgrade-to-8.1.1.md)
+* [Upgrade to 10.6.2 (recommended)](cardano-node-upgrades/upgrade-to-10.6.2.md)
+* [Legacy: upgrade to 8.7.2 from 8.0.0](cardano-node-upgrades/upgrade-to-8.1.1.md)

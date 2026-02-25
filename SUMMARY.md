@@ -1,6 +1,6 @@
 # Table of contents
 
-* [Cardano Node 9.2.1](README.md)
+* [Cardano Node 10.6.2](README.md)
 
 ## Installation Guide (Ubuntu / Debian)
 
@@ -9,7 +9,7 @@
 ***
 
 * [Adding SWAP (virtual ) memory](adding-swap-virtual-memory.md)
-* [Getting ready to install the Cardano Node (v9.2.1)](cardano-node-prerequisites.md)
+* [Getting ready to install the Cardano Node (v10.6.2)](cardano-node-prerequisites.md)
 * [Cardano Node Installation process](cardano-node-installation-process.md)
 
 ## Cardano Relay Configuration

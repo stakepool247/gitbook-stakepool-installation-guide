@@ -1,81 +1,130 @@
 ---
-description: >-
-  After we have done all the prerequisites we are finally ready to do the
-  installation process of Cardano Node!
+description: Install cardano-node/cardano-cli 10.6.2 using official release binaries.
 ---
 
-# Cardano Node Installation process
+# Cardano Node installation process (10.6.2)
 
-et's start by downloading the Cardano Node source code from git (GitHub)
+This section installs **cardano-node 10.6.2** from official GitHub release artifacts.
 
-```
-mkdir -p ~/git && cd ~/git
-git clone https://github.com/input-output-hk/cardano-node.git
-```
+## 1) Download release artifacts
 
-![git clone in action](<.gitbook/assets/CleanShot 2021-08-30 at 13.38.13.png>)
+For **x86_64 / amd64** Linux:
 
-You should have now a new folder - _cardano-node_ with the source code of the cardano node, let's go to that directory and choose which version we would like to install (compile)
-
-```
-cd cardano-node
-git fetch --all --recurse-submodules --tags
-git checkout $(curl -s https://api.github.com/repositories/188299874/releases/latest| jq .tag_name -r)
+```bash
+cd /tmp
+curl -L -o cardano-node-10.6.2-linux-amd64.tar.gz \
+  https://github.com/IntersectMBO/cardano-node/releases/download/10.6.2/cardano-node-10.6.2-linux-amd64.tar.gz
+curl -L -o cardano-node-10.6.2-sha256sums.txt \
+  https://github.com/IntersectMBO/cardano-node/releases/download/10.6.2/cardano-node-10.6.2-sha256sums.txt
 ```
 
-you should see the following output, check if the desired version is selected:
+For **arm64** Linux, use:
 
-![](<.gitbook/assets/CleanShot 2022-06-27 at 14.48.22@2x.jpg>)
-
-let's add the libsodium libraries to Cardano node project as well as force to use our installed GHC version:
-
-```
-echo "package trace-dispatcher" >> cabal.project.local
-echo "  ghc-options: -Wwarn" >> cabal.project.local
-echo "" >> cabal.project.local
-echo "package HsOpenSSL" >> cabal.project.local
-echo "  flags: -homebrew-openssl" >> cabal.project.local
-echo "" >> cabal.project.local
+```bash
+https://github.com/IntersectMBO/cardano-node/releases/download/10.6.2/cardano-node-10.6.2-linux-arm64.tar.gz
 ```
 
-Now we are ready to start the installation (compilation) process. \
-This will take a while... if you are installing this on the VPS server, then you can go and grab coffee/beer/wine/water... as it will take a while.&#x20;
+## 2) Verify checksum
 
-We will run this process in the background, so if your connection is interrupted, then it will still continue.&#x20;
-
-```
-cabal clean
-cabal update
-cabal build cardano-node cardano-cli
+```bash
+sha256sum cardano-node-10.6.2-linux-amd64.tar.gz
+cat cardano-node-10.6.2-sha256sums.txt
 ```
 
-as the last step in our installation process is to copy newly compiled bin (executive) files to an early created folder: _.local/bin_
+Compare the tarball checksum with the official checksum file.
 
-{% hint style="warning" %}
-_if you had a previous version of Cardano node running, then before you copy the new binary files, make sure that you have stopped your current Cardano-node processes, otherwise, you will not be able to overwrite the new file._&#x20;
-{% endhint %}
+## 3) Install binaries
 
-```
-mkdir -p ~/.local/bin
-cp -p "$(./scripts/bin-path.sh cardano-node)" ~/.local/bin/
-cp -p "$(./scripts/bin-path.sh cardano-cli)" ~/.local/bin/
-echo PATH="$PATH:$HOME/.local/bin/" >> $HOME/.bashrc
-source ~/.bashrc
+```bash
+tar -xzf cardano-node-10.6.2-linux-amd64.tar.gz
+install -m 755 ./bin/cardano-node ./bin/cardano-cli $HOME/.local/bin/
 ```
 
-Let's check if we have installed the binary files in the correct location and the latest version
+If the archive contains `cardano-submit-api` and `cardano-tracer`, you can install them too:
 
+```bash
+[ -f cardano-submit-api ] && install -m 755 cardano-submit-api $HOME/.local/bin/
+[ -f cardano-tracer ] && install -m 755 cardano-tracer $HOME/.local/bin/
 ```
-which cardano-node && which cardano-cli
+
+## 4) Validate installation
+
+```bash
+which cardano-node
+which cardano-cli
 cardano-node --version
 cardano-cli --version
-
 ```
 
-you should see something like this:
+You should see **cardano-node 10.6.2**. (`cardano-cli` version is released separately and may show a different semantic version, e.g. 10.15.x).
 
-<figure><img src=".gitbook/assets/CleanShot 2024-09-28 at 10.07.51.jpg" alt=""><figcaption></figcaption></figure>
+## 5) Install network configuration files
 
-Great! We have installed the Cardano node on your server! <br>
+The release archive already contains current environment configs under `./share/`.
 
-Congratulations on installing Cardano Node!
+Copy mainnet files:
+
+```bash
+mkdir -p $HOME/cardano/files/mainnet
+cp -r ./share/mainnet/* $HOME/cardano/files/mainnet/
+```
+
+If you prefer, you can fetch from Intersect environments page:
+
+- https://book.play.dev.cardano.org/environments.html
+
+## 6) Prepare systemd service (example)
+
+Create `/etc/systemd/system/cardano-node.service`:
+
+```ini
+[Unit]
+Description=Cardano Node
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=cardano
+Type=simple
+Restart=always
+RestartSec=5
+LimitNOFILE=1048576
+WorkingDirectory=/home/cardano/cardano
+ExecStart=/home/cardano/.local/bin/cardano-node run \
+  --topology /home/cardano/cardano/files/mainnet/topology.json \
+  --database-path /home/cardano/cardano/db \
+  --socket-path /home/cardano/cardano/ipc/node.socket \
+  --host-addr 0.0.0.0 \
+  --port 6000 \
+  --config /home/cardano/cardano/files/mainnet/config.json
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Then enable/start:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable cardano-node
+sudo systemctl start cardano-node
+sudo systemctl status cardano-node --no-pager
+```
+
+## 7) Check sync progress
+
+```bash
+journalctl -u cardano-node -f
+```
+
+In another terminal:
+
+```bash
+cardano-cli query tip --mainnet --socket-path /home/cardano/cardano/ipc/node.socket
+```
+
+When `syncProgress` approaches `100`, the node is near tip.
+
+---
+
+✅ Done — node 10.6.2 is installed and running.

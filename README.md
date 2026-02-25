@@ -2,62 +2,58 @@
 description: Cardano Stake Pool installation guide for dummies (Linux)
 ---
 
-# Cardano Node 9.2.1
-
-
+# Cardano Node 10.6.2
 
 {% hint style="success" %}
-The guide is updated for **Mainnet** to work with the **latest release: 9**.2.1
+The guide is updated for **Mainnet** with **cardano-node 10.6.2**.
 
-**if you are upgrading from a previous version - check the** [**Upgrade guide**](cardano-node-upgrades/upgrade-to-8.1.1.md) **below.**
+If you are upgrading from an older release, use the upgrade section and validate configs before restarting production nodes.
 {% endhint %}
 
 ***
 
 ## 📯 Before we start
 
-### Stake pool operator requirements:
+### Stake pool operator requirements
 
-* **basic knowledge of Linux administration.**
-* **ready to update your node** whenever a new release is coming out. (we will provide you with the necessary information)
-* **Ready to learn** new skills :)
+* Basic Linux administration skills
+* Be ready to update the node whenever a new release is published
+* Keep security + backups as a first-class concern (keys, firewall, SSH hardening)
 
-## Hardware Requirements for a Stake Pool
+## Hardware requirements for a stake pool
 
-#### Mainnet:
+#### Mainnet (recommended)
 
-* **2-3 Linux servers** (1 block-producing node + 1-2 relay nodes)
-  * **OS -** Linux 64-bit (Ubuntu 18.04 LTS, 20.04 LTS; Mint 19.3, 20; Debian 10.3)
-  * **2 vCPU -** 2GHz or faster ( recommended 4vCPUs)
-  * **24 GB** of RAM
-  * **200 GB** of disk space (Ideally SSD)
-  * **Good internet connection** (at least 10Mbps)
-* **Offsite PC** (Home PC/server) for your keys (cold storage)
-* **Hardware wallet**: Trezor or Ledger **(HIGHLY recommended)**
+* **2–3 Linux servers** (1 block producer + 1–2 relays)
+  * **OS:** Ubuntu 22.04/24.04 LTS or Debian 12+
+  * **CPU:** 2+ vCPU (4 vCPU preferred)
+  * **RAM:** 24 GB (for InMemory backend) / 8+ GB (for OnDisk backend)
+  * **Storage:** 300 GB minimum (350+ GB recommended, SSD)
+  * **Network:** stable 10+ Mbps, low packet loss
+* **Offline machine** for cold keys
+* **Hardware wallet** (strongly recommended)
 
-#### TestNet (pre-prod):
+#### Testnet / pre-prod
 
-* **2-3 Linux servers** (1 block-producing node + 1-2 relay nodes)
-  * **OS -** Linux 64-bit (Ubuntu 18.04 LTS, 20.04 LTS; Mint 19.3, 20; Debian 10.3)
-  * **Min 2 vCPU -** 1.6GHz or faster (2GHz or faster for a stake pool or relay)
-  * **Min 16** of RAM (24GB Recommended)
-  * **50 GB** of disk space (Ideally SSD)
-  * **Good internet connection** (at least 10Mbps)
-* **Offsite PC** (Home PC/server) for your keys (cold storage)
+* Similar setup with lower pressure, but keep at least:
+  * 2 vCPU
+  * 16 GB RAM recommended
+  * 150+ GB SSD
 
-\
-👉 We are using **Ubuntu 20.04 LTS** as our choice for the OS.\
-👉 If you have any questions - join our telegram group: [https://t.me/StakePool247help](https://t.me/StakePool247help) where we have some great **mentors** who are ready to help you!
+👉 This guide uses **Ubuntu 24.04 LTS** examples.  
+👉 Support group: [https://t.me/StakePool247help](https://t.me/StakePool247help)
 
-This guide is based on the official Cardano Official guide and from our experience. We understand that the information flow is HUGE... and therefore we want to have a place where you can find all the necessary information in setting up your own personal **ADA Staking Pool**.
+This guide is based on official Cardano docs + operator best practice, with practical commands and safer defaults.
 
 {% hint style="info" %}
-To get support, join Cardano Groups:
+Useful communities:
 
-👉 **StakePool247 Support Group:**\
+👉 **StakePool247 Support Group:**  
 [https://t.me/StakePool247help](https://t.me/StakePool247help)
 
-👉 **Cardano Shelley & StakePool Best Practice Workgroup** [**https://t.me/CardanoStakePoolWorkgroup**](https://t.me/CardanoStakePoolWorkgroup)&#x20;
+👉 **Cardano StakePool Workgroup:**  
+[https://t.me/CardanoStakePoolWorkgroup](https://t.me/CardanoStakePoolWorkgroup)
 
-👉 **Cardano Community Tech Support** [**https://t.me/CardanoCommunityTechSupport**](https://t.me/CardanoCommunityTechSupport)
+👉 **Cardano Community Tech Support:**  
+[https://t.me/CardanoCommunityTechSupport](https://t.me/CardanoCommunityTechSupport)
 {% endhint %}

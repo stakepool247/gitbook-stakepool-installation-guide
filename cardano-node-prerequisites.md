@@ -43,6 +43,10 @@ Expected values:
 - `x86_64` → use linux-amd64 artifact
 - `aarch64` → use linux-arm64 artifact
 
+{% hint style="info" %}
+Why this matters: if architecture and binary mismatch, the node will not start (`Exec format error`). Always verify `uname -m` before downloading.
+{% endhint %}
+
 ## 4) (Optional) Source-build prerequisites
 
 If you build from source instead of binary artifacts:
@@ -53,20 +57,31 @@ If you build from source instead of binary artifacts:
 
 For most operators, binary artifacts are preferred for speed and consistency.
 
-## 5) Open firewall ports (example)
+## 5) Firewall (recommended for production, optional for lab testing)
 
-Relay node example:
+By default, many Ubuntu/Debian servers have UFW **inactive**. Check first:
 
 ```bash
-# SSH
+sudo ufw status verbose
+```
+
+If you are doing a quick local/lab test, you can keep firewall setup for later.
+
+If this is a production relay, enable UFW now with only required ports:
+
+```bash
+# allow SSH (change if your SSH port is custom)
 sudo ufw allow 22/tcp
-# Cardano relay port (adjust if different)
+# allow relay port (default in this guide: 6000)
 sudo ufw allow 6000/tcp
+
 sudo ufw enable
 sudo ufw status verbose
 ```
 
-> Keep block producer private and reachable only by your relays/VPN.
+{% hint style="warning" %}
+For a **block producer**, do NOT expose BP port publicly. Keep BP reachable only from your relays (private network, WireGuard, or strict IP allowlist).
+{% endhint %}
 
 ## 6) Quick sanity checks
 
@@ -77,3 +92,7 @@ nproc
 ```
 
 Before syncing mainnet, ensure storage headroom is healthy (300+ GB). 350+ GB is safer for long-term growth.
+
+{% hint style="info" %}
+If RAM pressure is high, swap can prevent crashes, but swap is much slower than real RAM. If you constantly hit swap, upgrade memory instead of relying on swap as a permanent fix.
+{% endhint %}

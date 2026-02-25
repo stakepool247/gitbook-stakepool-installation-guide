@@ -2,12 +2,12 @@
 description: Cardano Stake Pool installation guide for dummies (Linux)
 ---
 
-# Cardano Node 8.1.1
+# Cardano Node 9.2.1
 
 
 
 {% hint style="success" %}
-The guide is updated for **Mainnet** to work with the **latest release: 8.1.1**
+The guide is updated for **Mainnet** to work with the **latest release: 9**.2.1
 
 **if you are upgrading from a previous version - check the** [**Upgrade guide**](cardano-node-upgrades/upgrade-to-8.1.1.md) **below.**
 {% endhint %}
@@ -28,9 +28,9 @@ The guide is updated for **Mainnet** to work with the **latest release: 8.1.1**
 
 * **2-3 Linux servers** (1 block-producing node + 1-2 relay nodes)
   * **OS -** Linux 64-bit (Ubuntu 18.04 LTS, 20.04 LTS; Mint 19.3, 20; Debian 10.3)
-  * **2 vCPU -** 1.6GHz or faster ( recommended 4vCPUs)
+  * **2 vCPU -** 2GHz or faster ( recommended 4vCPUs)
   * **24 GB** of RAM
-  * **120 GB** of disk space (Ideally SSD)
+  * **200 GB** of disk space (Ideally SSD)
   * **Good internet connection** (at least 10Mbps)
 * **Offsite PC** (Home PC/server) for your keys (cold storage)
 * **Hardware wallet**: Trezor or Ledger **(HIGHLY recommended)**

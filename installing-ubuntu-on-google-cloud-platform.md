@@ -1,5 +1,6 @@
 ---
 description: Quick intro on installing Ubuntu Virtual Machine on Google Cloud Platform
+hidden: true
 ---
 
 # Installing Ubuntu on Google Cloud Platform

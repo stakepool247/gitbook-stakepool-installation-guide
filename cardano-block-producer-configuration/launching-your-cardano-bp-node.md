@@ -125,7 +125,7 @@ cardano-node run \
 
 save by pressing **`ctrl+x`** and then **`Y`**
 
-now**, just start your node with start\_all.sh** - you should have a fully functional BP node!
+no&#x77;**, just start your node with start\_all.sh** - you should have a fully functional BP node!
 {% endtab %}
 {% endtabs %}
 

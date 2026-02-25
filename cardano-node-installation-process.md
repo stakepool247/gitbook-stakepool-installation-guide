@@ -6,7 +6,7 @@ description: >-
 
 # Cardano Node Installation process
 
-Let's start by downloading the Cardano Node source code from git (GitHub)
+et's start by downloading the Cardano Node source code from git (GitHub)
 
 ```
 mkdir -p ~/git && cd ~/git
@@ -20,7 +20,7 @@ You should have now a new folder - _cardano-node_ with the source code of the ca
 ```
 cd cardano-node
 git fetch --all --recurse-submodules --tags
-git checkout $(curl -s https://api.github.com/repos/input-output-hk/cardano-node/releases/latest| jq .tag_name -r)
+git checkout $(curl -s https://api.github.com/repositories/188299874/releases/latest| jq .tag_name -r)
 ```
 
 you should see the following output, check if the desired version is selected:
@@ -30,10 +30,12 @@ you should see the following output, check if the desired version is selected:
 let's add the libsodium libraries to Cardano node project as well as force to use our installed GHC version:
 
 ```
-echo "package cardano-crypto-praos" >> cabal.project.local
-echo "  flags: -external-libsodium-vrf" >> cabal.project.local
-echo "with-compiler: ghc-8.10.7" >> cabal.project.local
-
+echo "package trace-dispatcher" >> cabal.project.local
+echo "  ghc-options: -Wwarn" >> cabal.project.local
+echo "" >> cabal.project.local
+echo "package HsOpenSSL" >> cabal.project.local
+echo "  flags: -homebrew-openssl" >> cabal.project.local
+echo "" >> cabal.project.local
 ```
 
 Now we are ready to start the installation (compilation) process. \
@@ -42,7 +44,9 @@ This will take a while... if you are installing this on the VPS server, then you
 We will run this process in the background, so if your connection is interrupted, then it will still continue.&#x20;
 
 ```
-cabal build all &
+cabal clean
+cabal update
+cabal build cardano-node cardano-cli
 ```
 
 as the last step in our installation process is to copy newly compiled bin (executive) files to an early created folder: _.local/bin_
@@ -70,9 +74,8 @@ cardano-cli --version
 
 you should see something like this:
 
-<figure><img src=".gitbook/assets/CleanShot 2023-06-25 at 10.36.17@2x.jpg" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/CleanShot 2024-09-28 at 10.07.51.jpg" alt=""><figcaption></figcaption></figure>
 
-Great! We have installed the Cardano node on our server! \
-
+Great! We have installed the Cardano node on your server! <br>
 
 Congratulations on installing Cardano Node!

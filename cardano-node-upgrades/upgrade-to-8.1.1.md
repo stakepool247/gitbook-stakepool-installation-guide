@@ -1,11 +1,11 @@
 ---
-description: Quick update guide from 8.0.0 to 8.1.1
+description: Quick update guide from 8.x.x to 8.7.2
 cover: >-
   https://images.unsplash.com/photo-1558494949-ef010cbdcc31?crop=entropy&cs=srgb&fm=jpg&ixid=MnwxOTcwMjR8MHwxfHNlYXJjaHwxfHxzZXJ2ZXJ8ZW58MHx8fHwxNjQ2MTM5ODI1&ixlib=rb-1.2.1&q=85
 coverY: 0
 ---
 
-# Upgrade to 8.1.1 from 8.0.0
+# Upgrade to 8.7.2 from 8.0.0
 
 ### 1. backing up current binaries
 
@@ -50,6 +50,37 @@ git checkout ac83be33
 ./configure --enable-module-schnorrsig --enable-experimental
 make
 sudo make install
+```
+
+###
+
+### Installing BLST
+
+```
+mkdir -p ~/git && cd ~/git
+git clone https://github.com/supranational/blst
+cd blst
+git checkout v0.3.10
+./build.sh
+cat > libblst.pc << EOF
+prefix=/usr/local
+exec_prefix=\${prefix}
+libdir=\${exec_prefix}/lib
+includedir=\${prefix}/include
+
+Name: libblst
+Description: Multilingual BLS12-381 signature library
+URL: https://github.com/supranational/blst
+Version: 0.3.10
+Cflags: -I\${includedir}
+Libs: -L\${libdir} -lblst
+EOF
+
+sudo cp libblst.pc /usr/local/lib/pkgconfig/
+sudo cp bindings/blst_aux.h bindings/blst.h bindings/blst.hpp  /usr/local/include/
+sudo cp libblst.a /usr/local/lib
+sudo chmod u=rw,go=r /usr/local/{lib/{libblst.a,pkgconfig/libblst.pc},include/{blst.{h,hpp},blst_aux.h}}
+
 ```
 
 ### Update/ install new libsodium version
@@ -129,23 +160,25 @@ git clone https://github.com/input-output-hk/cardano-node.git
 cd cardano-node
 git fetch --all --recurse-submodules --tags
 
-# checking out the 8.1.1 version
-git checkout tags/8.1.1
+# checking out the 8.7.2 version
+git checkout tags/8.7.2
 ```
 
 ```
-# adding extra flags for libsodium library
-echo "package cardano-crypto-praos" >>  cabal.project.local
-echo "  flags: -external-libsodium-vrf" >>  cabal.project.local
-echo "with-compiler: ghc-8.10.7" >> cabal.project.local
+echo "package trace-dispatcher" >> cabal.project.local
+echo "  ghc-options: -Wwarn" >> cabal.project.local
+echo "" >> cabal.project.local
+echo "package HsOpenSSL" >> cabal.project.local
+echo "  flags: -homebrew-openssl" >> cabal.project.local
+echo "" >> cabal.project.local
 ```
 
-```
-# let's update cabal
-cabal update
-# now let's compile the code
-cabal build all
-```
+<pre><code># let's update cabal
+<strong>cabal clean
+</strong><strong>cabal update
+</strong># now let's compile the code
+cabal build cardano-node cardano-cli
+</code></pre>
 
 And now we wait...  it could take some while (1h+ ) to compile, depending on your server's CPU&#x20;
 
@@ -175,7 +208,7 @@ cardano-cli --version
 
 you should now have similar output:
 
-<figure><img src="../.gitbook/assets/CleanShot 2023-06-25 at 10.53.20@2x (1).jpg" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/CleanShot 2023-12-28 at 23.43.49@2x.jpg" alt=""><figcaption></figcaption></figure>
 
 
 
@@ -198,6 +231,6 @@ journalctl -u cardano-node.service -f -o cat
 
 {% hint style="info" %}
 Need help?\
-👉🏼 Join our Telegram support Group: [https://t.me/StakePool247help](https://www.youtube.com/redirect?event=video\_description\&redir\_token=QUFFLUhqbFFLWlhNYkhpRlhYd3gyWkIwbU91R2ZhUmZzUXxBQ3Jtc0tuUko0cnVvanYwVktab1FWalVMb0ZOVEpmTDBNRXNSRWwwbWk0UE5tdkZYRENDZWRBYjlxMVYxMTdqdjBfeDB3WmhiTDRjNm13RDVSeDhDQ0JEOWZfVUlEX1RaRm10UlJsWXZkTzdIY29aeTEtMnN3aw\&q=https%3A%2F%2Ft.me%2FStakePool247help)
+👉🏼 Join our Telegram support Group: [https://t.me/StakePool247help](https://www.youtube.com/redirect?event=video_description\&redir_token=QUFFLUhqbFFLWlhNYkhpRlhYd3gyWkIwbU91R2ZhUmZzUXxBQ3Jtc0tuUko0cnVvanYwVktab1FWalVMb0ZOVEpmTDBNRXNSRWwwbWk0UE5tdkZYRENDZWRBYjlxMVYxMTdqdjBfeDB3WmhiTDRjNm13RDVSeDhDQ0JEOWZfVUlEX1RaRm10UlJsWXZkTzdIY29aeTEtMnN3aw\&q=https%3A%2F%2Ft.me%2FStakePool247help)
 {% endhint %}
 

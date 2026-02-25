@@ -1,22 +1,22 @@
 # Table of contents
 
-* [Cardano Node 8.1.1](README.md)
+* [Cardano Node 9.2.1](README.md)
 
-## Installation Guide (Ubuntu / Debian) <a href="#cardano-node-installation-and-configuration-guide" id="cardano-node-installation-and-configuration-guide"></a>
+## Installation Guide (Ubuntu / Debian)
 
-* [Creating a user for Cardano Node](cardano-node-installation-and-configuration-guide/creating-a-user.md)
+* [Creating a user for Cardano Node](installation-guide-ubuntu-debian/creating-a-user.md)
 
 ***
 
 * [Adding SWAP (virtual ) memory](adding-swap-virtual-memory.md)
-* [Getting ready to install the Cardano Node (v8.1.1)](cardano-node-prerequisites.md)
+* [Getting ready to install the Cardano Node (v9.2.1)](cardano-node-prerequisites.md)
 * [Cardano Node Installation process](cardano-node-installation-process.md)
 
-## Cardano Relay Configuration <a href="#cardano-node-configuration" id="cardano-node-configuration"></a>
+## Cardano Relay Configuration
 
-* [Cardano Relay Configuration](cardano-node-configuration/cardano-node-configuration.md)
-* [Downloading Cardano Blockchain](cardano-node-configuration/downloading-cardano-blockchain.md)
-* [Launching Cardano Relay Node](cardano-node-configuration/launching-cardano-nodes.md)
+* [Cardano Relay Configuration](cardano-relay-configuration/cardano-node-configuration.md)
+* [Downloading Cardano Blockchain](cardano-relay-configuration/downloading-cardano-blockchain.md)
+* [Launching Cardano Relay Node](cardano-relay-configuration/launching-cardano-nodes.md)
 
 ## Cardano Block Producer configuration
 
@@ -31,4 +31,4 @@
 
 ## Cardano Node Upgrades
 
-* [Upgrade to 8.1.1 from 8.0.0](cardano-node-upgrades/upgrade-to-8.1.1.md)
+* [Upgrade to 8.7.2 from 8.0.0](cardano-node-upgrades/upgrade-to-8.1.1.md)

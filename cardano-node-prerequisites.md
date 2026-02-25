@@ -4,7 +4,7 @@ description: >-
   ) - is the installation process!
 ---
 
-# Getting ready to install the Cardano Node (v8.1.1)
+# Getting ready to install the Cardano Node (v9.2.1)
 
 to successfully install (compile) the Carano node, we need to be sure that we have all the necessary ingredients! To get them (install) type the following commands:
 
@@ -14,7 +14,7 @@ sudo apt-get upgrade -y
 ```
 
 ```
-sudo apt-get install automake build-essential pkg-config libffi-dev libgmp-dev libssl-dev libtinfo-dev libsystemd-dev zlib1g-dev make g++ tmux git jq wget libncursesw5 libtool autoconf curl python3 htop  nload -y
+sudo apt-get install automake build-essential pkg-config libffi-dev libgmp-dev libssl-dev libsystemd-dev zlib1g-dev make g++ tmux git jq wget libncurses-dev libtool autoconf curl python3 htop nload -y
 export LD_LIBRARY_PATH="/usr/local/lib:$LD_LIBRARY_PATH"
 ```
 
@@ -112,8 +112,7 @@ let's create a git folder where we will be compiling libsodium library from the 
 mkdir -p ~/git && cd ~/git
 ```
 
-Download and install libsodium library ( we need a specific branch of the library, so follow the guide)\
-
+Download and install libsodium library ( we need a specific branch of the library, so follow the guide)<br>
 
 {% hint style="warning" %}
 Starting from Cardano Node v8.0.0 needs a newer version of libsodium
@@ -150,7 +149,7 @@ sudo apt install libsodium-dev
 mkdir -p ~/git && cd ~/git
 git clone https://github.com/bitcoin-core/secp256k1
 cd secp256k1
-git checkout ac83be33
+git checkout acf5c55
 ./autogen.sh
 ./configure --enable-module-schnorrsig --enable-experimental
 make
@@ -158,5 +157,35 @@ sudo make install
 ```
 
 
+
+### Installing BLST
+
+
+
+<pre><code>mkdir -p ~/git &#x26;&#x26; cd ~/git
+<strong>git clone https://github.com/supranational/blst
+</strong>cd blst
+git checkout v0.3.10
+./build.sh
+cat > libblst.pc &#x3C;&#x3C; EOF
+prefix=/usr/local
+exec_prefix=\${prefix}
+libdir=\${exec_prefix}/lib
+includedir=\${prefix}/include
+
+Name: libblst
+Description: Multilingual BLS12-381 signature library
+URL: https://github.com/supranational/blst
+Version: 0.3.10
+Cflags: -I\${includedir}
+Libs: -L\${libdir} -lblst
+EOF
+
+sudo cp libblst.pc /usr/local/lib/pkgconfig/
+sudo cp bindings/blst_aux.h bindings/blst.h bindings/blst.hpp  /usr/local/include/
+sudo cp libblst.a /usr/local/lib
+sudo chmod u=rw,go=r /usr/local/{lib/{libblst.a,pkgconfig/libblst.pc},include/{blst.{h,hpp},blst_aux.h}}
+
+</code></pre>
 
 Let's move to the next step - the actual installation of Cardano Node!

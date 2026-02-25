@@ -121,4 +121,4 @@ Let's check if you have succeeded:
 
 if you see the following output, then you have successfully installed the scripts:
 
-<figure><img src="../.gitbook/assets/CleanShot 2023-05-20 at 00.34.31@2x.jpg" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/CleanShot 2024-09-28 at 16.38.06@2x.jpg" alt=""><figcaption></figcaption></figure>

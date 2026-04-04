@@ -3,9 +3,10 @@
 # Test suite for the Cardano SPO Installation Guide
 # Validates every step from the guide on a fresh Ubuntu/Debian server.
 #
-# Usage:  sudo bash test-guide.sh [--skip-user]
+# Usage:  sudo bash test-guide.sh [--skip-user] [--full-cleanup]
 #
-# --skip-user  Skip user creation (if already running as cardano or testing in container)
+# --skip-user     Skip user creation (if already running as cardano or testing in container)
+# --full-cleanup  After tests, remove cardano user, installed packages, and all data
 #
 # Exit codes:
 #   0  All tests passed
@@ -18,7 +19,7 @@ NODE_VERSION="10.6.2"
 NODE_PORT=3001
 CNODE_HOME="/home/cardano/cnode"
 CARDANO_USER="cardano"
-SYNC_TIMEOUT=60        # seconds to wait for sync progress
+SYNC_TIMEOUT=300       # seconds to wait for sync progress (fresh DB init can take 2-3 min)
 STARTUP_TIMEOUT=30     # seconds to wait for node to produce output
 
 # ─── State ───────────────────────────────────────────────────────────
@@ -27,11 +28,12 @@ TESTS_PASSED=0
 TESTS_FAILED=0
 FAILED_NAMES=()
 SKIP_USER=false
-NODE_PID=""
+FULL_CLEANUP=false
 
 for arg in "$@"; do
   case "$arg" in
-    --skip-user) SKIP_USER=true ;;
+    --skip-user)     SKIP_USER=true ;;
+    --full-cleanup)  FULL_CLEANUP=true ;;
   esac
 done
 
@@ -63,10 +65,15 @@ skip() {
 }
 
 cleanup() {
-  if [[ -n "$NODE_PID" ]] && kill -0 "$NODE_PID" 2>/dev/null; then
-    echo -e "\n${YELLOW}Stopping cardano-node (PID $NODE_PID)...${NC}"
-    kill -SIGINT "$NODE_PID" 2>/dev/null || true
-    wait "$NODE_PID" 2>/dev/null || true
+  if systemctl is-active cardano-node.service &>/dev/null; then
+    echo -e "\n${YELLOW}Stopping cardano-node service...${NC}"
+    systemctl stop cardano-node.service 2>/dev/null || true
+  fi
+  # Remove test service if left behind
+  if [[ -f /etc/systemd/system/cardano-node.service ]]; then
+    systemctl disable cardano-node.service &>/dev/null || true
+    rm -f /etc/systemd/system/cardano-node.service
+    systemctl daemon-reload &>/dev/null || true
   fi
 }
 trap cleanup EXIT
@@ -324,10 +331,13 @@ else
   fail "Mithril extract" "mithril-client binary not found after extraction"
 fi
 
-# ─── 9. Systemd unit file validation ────────────────────────────────
-section "9. Systemd service file"
+# ─── 9. Systemd service: install, start, verify sync ────────────────
+section "9. Systemd service (full lifecycle)"
 
-cat <<'UNIT' > /etc/systemd/system/cardano-node-test.service
+SERVICE_NAME="cardano-node"
+SERVICE_FILE="/etc/systemd/system/${SERVICE_NAME}.service"
+
+cat <<'UNIT' > "$SERVICE_FILE"
 [Unit]
 Description=Cardano Relay Node
 After=network-online.target
@@ -358,124 +368,190 @@ RestartSec=5
 WantedBy=multi-user.target
 UNIT
 
-if systemd-analyze verify cardano-node-test.service 2>&1 | grep -qi "error"; then
-  fail "Systemd unit" "$(systemd-analyze verify cardano-node-test.service 2>&1)"
+pass "Service file written to $SERVICE_FILE"
+
+# Validate the unit file
+VERIFY_OUTPUT=$(systemd-analyze verify "${SERVICE_NAME}.service" 2>&1 || true)
+if echo "$VERIFY_OUTPUT" | grep -qi "error"; then
+  fail "Systemd verify" "$VERIFY_OUTPUT"
 else
-  pass "Systemd unit file parses correctly"
+  pass "systemd-analyze verify passed"
 fi
 
-rm -f /etc/systemd/system/cardano-node-test.service
-
-# ─── 10. Node starts and begins syncing ─────────────────────────────
-section "10. Node startup and sync test"
-
-NODE_LOG="$CNODE_HOME/logs/test-run.log"
-
-echo "  Starting cardano-node on port $NODE_PORT..."
-
-su - "$CARDANO_USER" -c '
-  $HOME/.local/bin/cardano-node run \
-    --database-path $HOME/cnode/db \
-    --socket-path $HOME/cnode/sockets/node.socket \
-    --port '"$NODE_PORT"' \
-    --config $HOME/cnode/config/config.json \
-    --topology $HOME/cnode/config/topology.json \
-    > $HOME/cnode/logs/test-run.log 2>&1 &
-  echo $!
-' > /tmp/node_pid.txt
-
-NODE_PID=$(cat /tmp/node_pid.txt | tr -d '[:space:]')
-
-if [[ -z "$NODE_PID" ]] || ! kill -0 "$NODE_PID" 2>/dev/null; then
-  fail "Node start" "Process did not start (PID: '$NODE_PID')"
+# Reload, enable, start
+systemctl daemon-reload
+if systemctl enable "${SERVICE_NAME}.service" &>/dev/null; then
+  pass "Service enabled"
 else
-  pass "cardano-node started (PID: $NODE_PID)"
+  fail "Service enable" "systemctl enable failed"
 fi
 
-# Wait for the node to produce output
-echo "  Waiting up to ${STARTUP_TIMEOUT}s for node output..."
+if systemctl start "${SERVICE_NAME}.service"; then
+  pass "Service started"
+else
+  fail "Service start" "systemctl start failed"
+  echo "  Journal output:"
+  journalctl -u "${SERVICE_NAME}.service" -n 20 --no-pager 2>/dev/null | sed 's/^/    /'
+fi
+
+# Wait a moment and check it's still running (didn't crash immediately)
+sleep 3
+
+SERVICE_STATUS=$(systemctl is-active "${SERVICE_NAME}.service" 2>/dev/null || true)
+if [[ "$SERVICE_STATUS" == "active" ]]; then
+  pass "Service is active (running)"
+else
+  fail "Service status" "Expected 'active', got '$SERVICE_STATUS'"
+  echo "  Journal output:"
+  journalctl -u "${SERVICE_NAME}.service" -n 30 --no-pager 2>/dev/null | sed 's/^/    /'
+fi
+
+# Verify the process is running as the cardano user
+SERVICE_PID=$(systemctl show -p MainPID --value "${SERVICE_NAME}.service" 2>/dev/null || true)
+if [[ -n "$SERVICE_PID" && "$SERVICE_PID" != "0" ]]; then
+  PROC_USER=$(ps -o user= -p "$SERVICE_PID" 2>/dev/null | tr -d '[:space:]')
+  if [[ "$PROC_USER" == "$CARDANO_USER" ]]; then
+    pass "Process running as user '$CARDANO_USER' (PID: $SERVICE_PID)"
+  else
+    fail "Process user" "Expected '$CARDANO_USER', got '$PROC_USER'"
+  fi
+else
+  fail "Process PID" "Could not determine MainPID from systemd"
+fi
+
+# Check the node is listening on the configured port
+echo "  Waiting up to ${STARTUP_TIMEOUT}s for port $NODE_PORT..."
+PORT_UP=false
 WAITED=0
 while [[ $WAITED -lt $STARTUP_TIMEOUT ]]; do
-  if [[ -s "$NODE_LOG" ]]; then
+  if ss -tlnp 2>/dev/null | grep -q ":${NODE_PORT} "; then
+    PORT_UP=true
     break
   fi
   sleep 2
   WAITED=$((WAITED + 2))
 done
-
-if [[ -s "$NODE_LOG" ]]; then
-  pass "Node producing log output (${WAITED}s)"
+if $PORT_UP; then
+  pass "Node listening on port $NODE_PORT (${WAITED}s)"
 else
-  fail "Node output" "No log output after ${STARTUP_TIMEOUT}s"
-  echo "  Dumping any stderr..."
-  cat "$NODE_LOG" 2>/dev/null || echo "  (empty)"
+  fail "Port check" "Nothing listening on port $NODE_PORT after ${STARTUP_TIMEOUT}s"
 fi
 
-# Check the node is still alive (didn't crash on startup)
-if kill -0 "$NODE_PID" 2>/dev/null; then
-  pass "Node still running after startup"
-else
-  fail "Node crashed" "Process $NODE_PID is no longer running"
-  echo "  Last 20 lines of log:"
-  tail -20 "$NODE_LOG" 2>/dev/null || true
-fi
-
-# Wait for sync-related log entries
-echo "  Waiting up to ${SYNC_TIMEOUT}s for sync activity..."
-SYNC_DETECTED=false
+# Wait for the node socket to appear (means node completed initialization)
+SOCKET_PATH="$CNODE_HOME/sockets/node.socket"
+echo "  Waiting up to ${SYNC_TIMEOUT}s for node socket..."
 WAITED=0
 while [[ $WAITED -lt $SYNC_TIMEOUT ]]; do
-  if grep -qiE "(chain|block|ledger|peer|sync|slot|tip)" "$NODE_LOG" 2>/dev/null; then
-    SYNC_DETECTED=true
+  if [[ -S "$SOCKET_PATH" ]]; then
     break
   fi
-  # Also check the node hasn't crashed
-  if ! kill -0 "$NODE_PID" 2>/dev/null; then
+  if [[ "$(systemctl is-active ${SERVICE_NAME}.service 2>/dev/null)" != "active" ]]; then
     break
   fi
-  sleep 3
-  WAITED=$((WAITED + 3))
+  sleep 5
+  WAITED=$((WAITED + 5))
 done
 
-if $SYNC_DETECTED; then
-  pass "Sync activity detected in logs (${WAITED}s)"
-  echo -e "  ${GREEN}Sample log output:${NC}"
-  grep -iE "(chain|block|ledger|peer|sync|slot|tip)" "$NODE_LOG" 2>/dev/null | head -5 | sed 's/^/    /'
+if [[ -S "$SOCKET_PATH" ]]; then
+  pass "Node socket created (${WAITED}s)"
 else
-  if kill -0 "$NODE_PID" 2>/dev/null; then
-    fail "Sync detection" "Node running but no sync keywords in log after ${SYNC_TIMEOUT}s"
+  if [[ "$(systemctl is-active ${SERVICE_NAME}.service 2>/dev/null)" == "active" ]]; then
+    fail "Node socket" "Socket not created after ${SYNC_TIMEOUT}s (node may still be initializing)"
   else
-    fail "Sync detection" "Node crashed before sync started"
+    fail "Node socket" "Service crashed during initialization"
   fi
-  echo "  Last 20 lines of log:"
-  tail -20 "$NODE_LOG" 2>/dev/null | sed 's/^/    /' || true
+  echo "  Last 20 journal lines:"
+  journalctl -u "${SERVICE_NAME}.service" -n 20 --no-pager 2>/dev/null | sed 's/^/    /'
 fi
 
-# Stop the node
-echo "  Stopping node..."
-kill -SIGINT "$NODE_PID" 2>/dev/null || true
+# Query the node via cardano-cli to confirm it's responding
+if [[ -S "$SOCKET_PATH" ]]; then
+  echo "  Querying node tip via cardano-cli..."
+  TIP_OUTPUT=$(run_as_cardano "CARDANO_NODE_SOCKET_PATH=$SOCKET_PATH \$HOME/.local/bin/cardano-cli query tip --mainnet 2>&1" || true)
+
+  if echo "$TIP_OUTPUT" | jq -e '.slot' &>/dev/null; then
+    SLOT=$(echo "$TIP_OUTPUT" | jq -r '.slot')
+    SYNC_PCT=$(echo "$TIP_OUTPUT" | jq -r '.syncProgress // "unknown"')
+    pass "cardano-cli query tip works (slot: $SLOT, syncProgress: $SYNC_PCT)"
+
+    # Check chain is advancing
+    sleep 5
+    TIP2=$(run_as_cardano "CARDANO_NODE_SOCKET_PATH=$SOCKET_PATH \$HOME/.local/bin/cardano-cli query tip --mainnet 2>&1" || true)
+    SLOT2=$(echo "$TIP2" | jq -r '.slot' 2>/dev/null || echo "0")
+    if [[ "$SLOT2" -gt "$SLOT" ]]; then
+      pass "Chain is advancing (slot $SLOT -> $SLOT2)"
+    else
+      skip "Chain advancement (slot unchanged — node may be between sync batches)"
+    fi
+  else
+    fail "cardano-cli query tip" "Unexpected output: $(echo "$TIP_OUTPUT" | head -3)"
+  fi
+fi
+
+# Stop and clean up service
+echo "  Stopping service..."
+systemctl stop "${SERVICE_NAME}.service" 2>/dev/null || true
+
 STOP_WAITED=0
-while kill -0 "$NODE_PID" 2>/dev/null && [[ $STOP_WAITED -lt 15 ]]; do
+while [[ "$(systemctl is-active ${SERVICE_NAME}.service 2>/dev/null)" == "active" && $STOP_WAITED -lt 15 ]]; do
   sleep 1
   STOP_WAITED=$((STOP_WAITED + 1))
 done
-if ! kill -0 "$NODE_PID" 2>/dev/null; then
-  pass "Node stopped cleanly"
-else
-  kill -9 "$NODE_PID" 2>/dev/null || true
-  pass "Node stopped (forced)"
-fi
-NODE_PID=""
 
-# ─── 11. Cleanup ────────────────────────────────────────────────────
-section "11. Cleanup"
+if [[ "$(systemctl is-active ${SERVICE_NAME}.service 2>/dev/null)" != "active" ]]; then
+  pass "Service stopped cleanly"
+else
+  systemctl kill "${SERVICE_NAME}.service" 2>/dev/null || true
+  pass "Service stopped (forced)"
+fi
+
+systemctl disable "${SERVICE_NAME}.service" &>/dev/null || true
+rm -f "$SERVICE_FILE"
+systemctl daemon-reload &>/dev/null
+pass "Service cleaned up"
+
+# ─── 10. Cleanup ────────────────────────────────────────────────────
+section "10. Cleanup"
 
 rm -rf "$DOWNLOAD_DIR"
 rm -rf "$CNODE_HOME/db"
 rm -f "$CNODE_HOME/sockets/node.socket"
-rm -f "$NODE_LOG"
-rm -f /tmp/node_pid.txt
 pass "Temp files cleaned up"
+
+if $FULL_CLEANUP; then
+  echo -e "  ${YELLOW}Full cleanup requested — removing everything...${NC}"
+
+  # Remove all cardano data
+  rm -rf "$CNODE_HOME"
+  rm -rf /home/cardano/.local/bin/cardano-node /home/cardano/.local/bin/cardano-cli
+  rm -rf /home/cardano/.local/bin/cardano-submit-api /home/cardano/.local/bin/cardano-tracer
+  rm -rf /home/cardano/.local/bin/mithril-client
+  pass "Cardano binaries and data removed"
+
+  # Remove user
+  if id "$CARDANO_USER" &>/dev/null; then
+    userdel -r "$CARDANO_USER" 2>/dev/null || true
+    pass "User '$CARDANO_USER' removed"
+  fi
+
+  # Remove swap (only if we created it)
+  if [[ -f /swapfile ]]; then
+    swapoff /swapfile 2>/dev/null || true
+    rm -f /swapfile
+    sed -i '/\/swapfile/d' /etc/fstab 2>/dev/null || true
+    sed -i '/vm.swappiness/d' /etc/sysctl.conf 2>/dev/null || true
+    sed -i '/vm.vfs_cache_pressure/d' /etc/sysctl.conf 2>/dev/null || true
+    pass "Swap removed"
+  fi
+
+  # Remove installed packages
+  PACKAGES="curl wget jq git tmux htop nload unzip xz-utils build-essential pkg-config libffi-dev libgmp-dev libssl-dev libsystemd-dev zlib1g-dev libncurses-dev libtool autoconf automake libsodium-dev"
+  apt-get remove -y -qq $PACKAGES &>/dev/null 2>&1 || true
+  apt-get autoremove -y -qq &>/dev/null 2>&1 || true
+  pass "Installed packages removed"
+
+  echo -e "  ${GREEN}Server restored to clean state.${NC}"
+fi
 
 # ─── Results ─────────────────────────────────────────────────────────
 echo ""

@@ -10,6 +10,17 @@ The guide is updated for **Mainnet** with **cardano-node 10.6.2**.
 If you are upgrading from an older release, use the upgrade section and validate configs before restarting production nodes.
 {% endhint %}
 
+{% hint style="info" %}
+**Quick setup:** Want to skip the copy-paste and get a relay running in minutes? Run this on a fresh Ubuntu/Debian server:
+
+```bash
+curl -sL https://raw.githubusercontent.com/stakepool247/gitbook-stakepool-installation-guide/main/scripts/setup-relay.sh -o setup-relay.sh
+sudo bash setup-relay.sh
+```
+
+This automates every step from this guide: user creation, packages, cardano-node install, config files, Mithril client, and systemd service. Read through the guide below to understand what each step does.
+{% endhint %}
+
 ***
 
 ## 📯 Before we start

@@ -10,77 +10,40 @@ Launching cardano-node as system service
 
 Launching cardano node as a system service is the recommended way to run the process on production servers.
 
-{% tabs %}
-{% tab title="Mainnet" %}
-create a **systemd** service configuration file with all the keys and other settings, so the **cardano node process will be running in the background:**
+Create a **systemd** service configuration file so the **cardano node process will run in the background:**
 
 ```
 cat <<EOF | sudo tee /etc/systemd/system/cardano-node.service
 [Unit]
-Description=Cardano Pool
-After=multi-user.target
+Description=Cardano Relay Node
+After=network-online.target
+Wants=network-online.target
+
 [Service]
 Type=simple
+User=cardano
+Group=cardano
+WorkingDirectory=/home/cardano/cnode
 ExecStart=/home/cardano/.local/bin/cardano-node run \\
     --config /home/cardano/cnode/config/config.json \\
     --topology /home/cardano/cnode/config/topology.json \\
-    --database-path  /home/cardano/cnode/db/ \\
-    --socket-path  /home/cardano/cnode/sockets/node.socket \\
-    --host-addr 0.0.0.0 --port 3001    
-Environment="LD_LIBRARY_PATH=/usr/local/lib"
-KillSignal = SIGINT
-RestartKillSignal = SIGINT
+    --database-path /home/cardano/cnode/db \\
+    --socket-path /home/cardano/cnode/sockets/node.socket \\
+    --host-addr 0.0.0.0 \\
+    --port 3001
+KillSignal=SIGINT
+RestartKillSignal=SIGINT
 StandardOutput=journal
 StandardError=journal
-SyslogIdentifier=cardano
-LimitNOFILE=32768
-
+SyslogIdentifier=cardano-relay
+LimitNOFILE=1048576
 Restart=on-failure
-RestartSec=360s
-WorkingDirectory=~
-User=cardano
-Group=cardano
+RestartSec=5
+
 [Install]
 WantedBy=multi-user.target
 EOF
 ```
-{% endtab %}
-
-{% tab title="TestNet" %}
-create a **systemd** service configuration file with all the keys and other settings, so the **Cardano node process will be running in the background:**
-
-```
-cat <<EOF | sudo tee /etc/systemd/system/cardano-node.service
-[Unit]
-Description=Cardano Pool
-After=multi-user.target
-[Service]
-Type=simple
-ExecStart=/home/cardano/.local/bin/cardano-node run \\
-    --config /home/cardano/cnode/config/config.json \\
-    --topology /home/cardano/cnode/config/topology.json \\
-    --database-path  /home/cardano/cnode/db/ \\
-    --socket-path  /home/cardano/cnode/sockets/node.socket \\
-    --host-addr 0.0.0.0 --port 3001    
-Environment="LD_LIBRARY_PATH=/usr/local/lib"
-KillSignal = SIGINT
-RestartKillSignal = SIGINT
-StandardOutput=journal
-StandardError=journal
-SyslogIdentifier=cardano
-LimitNOFILE=32768
-
-Restart=on-failure
-RestartSec=360s
-WorkingDirectory=~
-User=cardano
-Group=cardano
-[Install]
-WantedBy=multi-user.target
-EOF
-```
-{% endtab %}
-{% endtabs %}
 
 let's enable the service and start it:
 

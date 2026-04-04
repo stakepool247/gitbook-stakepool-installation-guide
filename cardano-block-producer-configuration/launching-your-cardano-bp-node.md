@@ -35,35 +35,34 @@ create a **systemd** service configuration file with all the keys and other sett
 ```
 cat <<EOF | sudo tee /etc/systemd/system/cardano-node.service
 [Unit]
-Description=Cardano Pool
-After=multi-user.target
+Description=Cardano Block Producer
+After=network-online.target
+Wants=network-online.target
+
 [Service]
 Type=simple
-ExecStart=/home/cardano/.local/bin/cardano-node run \
---config /home/cardano/cnode/config/config.json \
---topology /home/cardano/cnode/config/topology.json \
---database-path  /home/cardano/cnode/db/  \
---socket-path  /home/cardano/cnode/sockets/node.socket \
---host-addr 0.0.0.0 \
---port 3001 \
---shelley-kes-key /home/cardano/cnode/keys/myPool.kes.skey \
---shelley-vrf-key /home/cardano/cnode/keys/myPool.vrf.skey \
---shelley-operational-certificate /home/cardano/cnode/keys/myPool.node.opcert
-
-
-KillSignal = SIGINT
-RestartKillSignal = SIGINT
-StandardOutput=syslog
-StandardError=syslog
-SyslogIdentifier=cardano
-LimitNOFILE=32768
-
-
-Restart=on-failure
-RestartSec=45s
-WorkingDirectory=~
 User=cardano
 Group=cardano
+WorkingDirectory=/home/cardano/cnode
+ExecStart=/home/cardano/.local/bin/cardano-node run \\
+    --config /home/cardano/cnode/config/config.json \\
+    --topology /home/cardano/cnode/config/topology.json \\
+    --database-path /home/cardano/cnode/db \\
+    --socket-path /home/cardano/cnode/sockets/node.socket \\
+    --host-addr 0.0.0.0 \\
+    --port 3001 \\
+    --shelley-kes-key /home/cardano/cnode/keys/myPool.kes.skey \\
+    --shelley-vrf-key /home/cardano/cnode/keys/myPool.vrf.skey \\
+    --shelley-operational-certificate /home/cardano/cnode/keys/myPool.node.opcert
+KillSignal=SIGINT
+RestartKillSignal=SIGINT
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=cardano-bp
+LimitNOFILE=1048576
+Restart=on-failure
+RestartSec=5
+
 [Install]
 WantedBy=multi-user.target
 EOF
@@ -112,12 +111,12 @@ and add the keys to your launch script
 #!/bin/bash
   
 cardano-node run \
- --database-path ~/cnode/db/ \
+ --database-path ~/cnode/db \
  --socket-path ~/cnode/sockets/node.socket \
  --host-addr 0.0.0.0 \
- --port 3000 \
- --config ~/cnode/config/mainnet-config.json \
- --topology ~/cnode/config/mainnet-topology.json \
+ --port 3001 \
+ --config ~/cnode/config/config.json \
+ --topology ~/cnode/config/topology.json \
  --shelley-kes-key ~/cnode/keys/myPool.kes.skey \
  --shelley-vrf-key ~/cnode/keys/myPool.vrf.skey \
  --shelley-operational-certificate ~/cnode/keys/myPool.node.opcert

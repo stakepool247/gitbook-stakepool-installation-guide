@@ -68,8 +68,8 @@ genesisfile_byron="/home/cardano/cnode/config/byron-genesis.json"       #Byron-G
 cardanocli="cardano-cli"        #Path to your cardano-cli you wanna use
 cardanonode="cardano-node"      #Path to your cardano-node you wanna use
 
-magicparam="--mainnet"  #choose "--mainnet" for mainnet or for example "--testnet-magic 1097911063" for a testnet
-addrformat="--mainnet"  #choose "--mainnet" for mainnet address format or like "--testnet-magic 1097911063" for testnet address format
+magicparam="--mainnet"  #choose "--mainnet" for mainnet or "--testnet-magic 1" for pre-prod
+addrformat="--mainnet"  #choose "--mainnet" for mainnet address format or "--testnet-magic 1" for pre-prod
 
 itn_jcli="./jcli" #only needed if you wanna include your ITN witness for your pool-ticker
 
@@ -93,19 +93,19 @@ Now we have to do a simple configuration so the script knows where to find files
 cat <<EOF > ~/.common.inc
 socket="/home/cardano/cnode/sockets/node.socket"
 
-genesisfile="/home/cardano/cnode/config/testnet-shelley-genesis.json"           #Shelley-Genesis path
-genesisfile_byron="/home/cardano/cnode/config/testnet-byron-genesis.json"       #Byron-Genesis path
+genesisfile="/home/cardano/cnode/config/shelley-genesis.json"           #Shelley-Genesis path
+genesisfile_byron="/home/cardano/cnode/config/byron-genesis.json"       #Byron-Genesis path
 
 cardanocli="cardano-cli"        #Path to your cardano-cli you wanna use
 cardanonode="cardano-node"      #Path to your cardano-node you wanna use
 
-magicparam="--testnet-magic 1097911063"  #choose "--mainnet" for mainnet or for example "--testnet-magic 1097911063" for a testnet
-addrformat="--testnet-magic 1097911063"  #choose "--mainnet" for mainnet address format or like "--testnet-magic 1097911063" for testnet address format
+magicparam="--testnet-magic 1"  #choose "--mainnet" for mainnet or "--testnet-magic 1" for pre-prod
+addrformat="--testnet-magic 1"  #choose "--mainnet" for mainnet address format or "--testnet-magic 1" for pre-prod
 
 itn_jcli="./jcli" #only needed if you wanna include your ITN witness for your pool-ticker
 
 #--------- leave this next value until you have to change it for a testnet
-byronToShelleyEpochs=74 #208 for the mainnet, 74 for the testnet
+byronToShelleyEpochs=4 #208 for the mainnet, 4 for pre-prod
 EOF
 ```
 {% endtab %}

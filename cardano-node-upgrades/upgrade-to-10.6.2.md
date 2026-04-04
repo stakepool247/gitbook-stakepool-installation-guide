@@ -37,7 +37,7 @@ Ensure checksum matches exactly.
 ```bash
 sudo cp -a /home/cardano/.local/bin/cardano-node /home/cardano/.local/bin/cardano-node.bak.$(date +%F-%H%M) || true
 sudo cp -a /home/cardano/.local/bin/cardano-cli /home/cardano/.local/bin/cardano-cli.bak.$(date +%F-%H%M) || true
-cp -a /home/cardano/cnode/config/mainnet /home/cardano/cnode/config/mainnet.bak.$(date +%F-%H%M)
+cp -a /home/cardano/cnode/config /home/cardano/cnode/config.bak.$(date +%F-%H%M)
 ```
 
 ## 3) Install new binaries
@@ -47,11 +47,10 @@ tar -xzf "$FILE"
 install -m 755 ./bin/cardano-node ./bin/cardano-cli /home/cardano/.local/bin/
 ```
 
-## 4) Refresh mainnet config bundle
+## 4) Refresh config files
 
 ```bash
-mkdir -p /home/cardano/cnode/config/mainnet
-cp -r ./share/mainnet/* /home/cardano/cnode/config/mainnet/
+cp ./share/mainnet/* /home/cardano/cnode/config/
 ```
 
 ## 5) Restart node

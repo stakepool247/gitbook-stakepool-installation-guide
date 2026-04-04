@@ -35,6 +35,10 @@ mkdir -p config db sockets keys logs scripts
 
 grep -q 'export PATH="$HOME/.local/bin:$PATH"' $HOME/.bashrc || \
   echo 'export PATH="$HOME/.local/bin:$PATH"' >> $HOME/.bashrc
+
+grep -q 'CARDANO_NODE_SOCKET_PATH' $HOME/.bashrc || \
+  echo 'export CARDANO_NODE_SOCKET_PATH="$HOME/cnode/sockets/node.socket"' >> $HOME/.bashrc
+
 source $HOME/.bashrc
 ```
 
@@ -77,8 +81,8 @@ If this is a production relay, enable UFW now with only required ports:
 ```bash
 # allow SSH (change if your SSH port is custom)
 sudo ufw allow 22/tcp
-# allow relay port (default in this guide: 6000)
-sudo ufw allow 6000/tcp
+# allow relay port (default in this guide: 3001)
+sudo ufw allow 3001/tcp
 
 sudo ufw enable
 sudo ufw status verbose

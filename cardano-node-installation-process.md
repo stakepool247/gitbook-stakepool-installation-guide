@@ -25,7 +25,11 @@ curl -L -o cardano-node-10.6.2-sha256sums.txt \
 For **arm64** Linux, use:
 
 ```bash
-https://github.com/IntersectMBO/cardano-node/releases/download/10.6.2/cardano-node-10.6.2-linux-arm64.tar.gz
+cd /tmp
+curl -L -o cardano-node-10.6.2-linux-arm64.tar.gz \
+  https://github.com/IntersectMBO/cardano-node/releases/download/10.6.2/cardano-node-10.6.2-linux-arm64.tar.gz
+curl -L -o cardano-node-10.6.2-sha256sums.txt \
+  https://github.com/IntersectMBO/cardano-node/releases/download/10.6.2/cardano-node-10.6.2-sha256sums.txt
 ```
 
 ## 2) Verify checksum
@@ -66,69 +70,24 @@ You should see **cardano-node 10.6.2**. (`cardano-cli` version is released separ
 
 The release archive already contains current environment configs under `./share/`.
 
-Copy mainnet files:
-
+{% tabs %}
+{% tab title="Mainnet" %}
 ```bash
-mkdir -p $HOME/cnode/config/mainnet
-cp -r ./share/mainnet/* $HOME/cnode/config/mainnet/
+cp ./share/mainnet/* $HOME/cnode/config/
 ```
+{% endtab %}
 
-If you prefer, you can fetch from Intersect environments page:
+{% tab title="Testnet (pre-prod)" %}
+```bash
+cp ./share/preprod/* $HOME/cnode/config/
+```
+{% endtab %}
+{% endtabs %}
+
+You can also fetch the latest configs from the Intersect environments page:
 
 - https://book.play.dev.cardano.org/environments.html
 
-## 6) Prepare systemd service (example)
-
-Create `/etc/systemd/system/cardano-node.service`:
-
-```ini
-[Unit]
-Description=Cardano Node
-After=network-online.target
-Wants=network-online.target
-
-[Service]
-User=cardano
-Type=simple
-Restart=always
-RestartSec=5
-LimitNOFILE=1048576
-WorkingDirectory=/home/cardano/cnode
-ExecStart=/home/cardano/.local/bin/cardano-node run \
-  --topology /home/cardano/cnode/config/mainnet/topology.json \
-  --database-path /home/cardano/cnode/db \
-  --socket-path /home/cardano/cnode/sockets/node.socket \
-  --host-addr 0.0.0.0 \
-  --port 6000 \
-  --config /home/cardano/cnode/config/mainnet/config.json
-
-[Install]
-WantedBy=multi-user.target
-```
-
-Then enable/start:
-
-```bash
-sudo systemctl daemon-reload
-sudo systemctl enable cardano-node
-sudo systemctl start cardano-node
-sudo systemctl status cardano-node --no-pager
-```
-
-## 7) Check sync progress
-
-```bash
-journalctl -u cardano-node -f
-```
-
-In another terminal:
-
-```bash
-cardano-cli query tip --mainnet --socket-path /home/cardano/cnode/sockets/node.socket
-```
-
-When `syncProgress` approaches `100`, the node is near tip.
-
 ---
 
-✅ Done — node 10.6.2 is installed and running.
+✅ Done — cardano-node 10.6.2 binaries and configs are installed. Continue to the **Relay Configuration** section to set up and launch your node.

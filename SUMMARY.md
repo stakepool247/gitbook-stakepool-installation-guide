@@ -25,10 +25,6 @@
 * [Generating Cardano Block producer keys](cardano-block-producer-configuration/generating-cardano-block-producer-keys.md)
 * [Launching your Cardano BP node!](cardano-block-producer-configuration/launching-your-cardano-bp-node.md)
 
-***
-
-* [Installing Ubuntu on Google Cloud Platform](installing-ubuntu-on-google-cloud-platform.md)
-
 ## Cardano Node Upgrades
 
 * [Upgrade to 10.6.2 (recommended)](cardano-node-upgrades/upgrade-to-10.6.2.md)

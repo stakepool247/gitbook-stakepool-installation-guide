@@ -1,14 +1,10 @@
 ---
-description: >-
-  Previously we launched the node in active ssh session, which means, as soon we
-  close the browser, the node will stop working
+description: Set up cardano-node as a systemd service so it runs in the background and survives reboots.
 ---
 
 # Launching Cardano Relay Node
 
-Launching cardano-node as system service
-
-Launching cardano node as a system service is the recommended way to run the process on production servers.
+Running cardano-node as a **systemd service** is the recommended approach for production servers. The node will start automatically on boot and restart on failure.
 
 Create a **systemd** service configuration file so the **cardano node process will run in the background:**
 
@@ -45,9 +41,10 @@ WantedBy=multi-user.target
 EOF
 ```
 
-let's enable the service and start it:
+let's reload systemd, enable the service (auto-start on boot) and start it:
 
 ```
+sudo systemctl daemon-reload
 sudo systemctl enable cardano-node.service
 sudo systemctl start cardano-node.service
 ```
@@ -64,20 +61,42 @@ journalctl -u cardano-node.service -f -o cat
 
 **We have set up your first relay node!** &#x20;
 
-**As a next step - you can do the same for your core/relay server as you need a minimum of 2 servers**
+**As a next step, repeat the installation and relay setup on your second relay server.** You need a minimum of 2 servers:
 
-**1) Relay node, a s**erver that is between your core server and other relay servers,  serves as a protection to your core\
-**2) core node (producer)**: a server which is producing blocks\
-**3) cold PC/hardware wallet:** a secure computer on which you are generating Stake Pool Keys and wallets.
+**1) Relay nodes** — publicly reachable servers that sit between your block producer and the rest of the Cardano network, shielding your BP from direct exposure.\
+**2) Block producer (BP)** — the server that mints blocks, connected only to your relays.\
+**3) Offline machine / hardware wallet** — a secure computer (never connected to the internet) where you generate stake pool keys and sign transactions.
 
-Ideally, for each core server, you would have 2 relay servers where they can connect
+Ideally, run 2 relay nodes for each block producer:
 
 ![](<../.gitbook/assets/image (11).png>)
 
+### Topology: connecting your relays to your BP
 
+After you set up your block producer, you'll need to add it as a **local root peer** in each relay's `topology.json`. Edit `~/cnode/config/topology.json` on each relay and add your BP's private IP under `localRoots`:
+
+```json
+"localRoots": [
+  { "accessPoints": [
+      { "address": "YOUR_BP_PRIVATE_IP", "port": 3001 }
+    ],
+    "advertise": false,
+    "trustable": true,
+    "valency": 1
+  }
+]
+```
+
+Similarly, on your BP's `topology.json`, add your relay IPs as local roots and set `useLedgerAfterSlot` to `-1` (BP should never connect to random peers):
+
+```json
+"useLedgerAfterSlot": -1
+```
+
+After editing topology, restart the node: `sudo systemctl restart cardano-node`
 
 {% hint style="danger" %}
-**NEVER, EVER generate your wallet and stake pool keys on your online servers! It's a BAD, BAD practice. Install on your local machine VirtualBox+Ubuntu and do the wallet and key registration (either by hand or using CNTOOLS or Martins SPOS scripts)**
+**NEVER generate your wallet and stake pool keys on your online servers!** Use an offline (air-gapped) machine running Ubuntu, or a hardware wallet (Trezor/Ledger). Anyone with access to your keys has full control over your pool and funds.
 {% endhint %}
 
-**if you need any help - you can contact us directly using Telegram:** [**https://t.me/StakePool247help**](https://t.me/StakePool247help) <br>
+**If you need any help:** [**https://t.me/StakePool247help**](https://t.me/StakePool247help)

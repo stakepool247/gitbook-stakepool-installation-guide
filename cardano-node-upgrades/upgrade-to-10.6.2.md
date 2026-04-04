@@ -49,9 +49,13 @@ install -m 755 ./bin/cardano-node ./bin/cardano-cli /home/cardano/.local/bin/
 
 ## 4) Refresh config files
 
+For mainnet:
+
 ```bash
 cp ./share/mainnet/* /home/cardano/cnode/config/
 ```
+
+For pre-prod testnet, use `./share/preprod/*` instead.
 
 ## 5) Restart node
 

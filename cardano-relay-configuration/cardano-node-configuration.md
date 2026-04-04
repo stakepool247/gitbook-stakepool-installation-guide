@@ -1,7 +1,5 @@
 ---
-description: >-
-  Let's create a simple configuration for your core/relay node (for core node
-  you will need to register keys/certificates which we will touch later)
+description: Configure your Cardano relay node — config files, topology, and quick test.
 ---
 
 # Cardano Relay Configuration
@@ -9,6 +7,12 @@ description: >-
 {% hint style="info" %}
 If you followed the installation guide, your config files are already in `~/cnode/config/`. This section covers relay-specific adjustments. If you need to re-download configs, see the tabs below.
 {% endhint %}
+
+### Understanding relay vs block producer
+
+Your **relay nodes** are publicly reachable and connect to the wider Cardano network. They shield your **block producer** (BP) from direct internet exposure. A typical setup is 1 BP + 2 relays.
+
+The default `topology.json` from the release uses **P2P (peer-to-peer)** networking, which automatically discovers and connects to peers. After you set up your BP, you should add it as a local root peer in your relay's `topology.json` so they stay connected. This is covered in the BP section.
 
 ### Updating configuration files (optional)
 

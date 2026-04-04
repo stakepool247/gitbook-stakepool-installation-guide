@@ -66,12 +66,15 @@ now you can also check with the  `htop` command and you should see the used and 
 
 ![](<.gitbook/assets/CleanShot 2021-04-07 at 23.08.17.png>)
 
-6\. Let's also increase the "swapiness" of the swap space - so the system is using this&#x20;
+6\. Let's also tune swap behavior so the system prefers real RAM and only uses swap under pressure:
 
 ```
-# Update sysctl.conf
+# Add settings to sysctl.conf (persist across reboots)
 echo 'vm.swappiness=10' | sudo tee -a /etc/sysctl.conf
 echo 'vm.vfs_cache_pressure=50' | sudo tee -a /etc/sysctl.conf
+
+# Apply immediately without reboot
+sudo sysctl -p
 ```
 
 

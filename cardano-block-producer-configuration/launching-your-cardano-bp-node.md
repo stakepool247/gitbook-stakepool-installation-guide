@@ -124,9 +124,44 @@ cardano-node run \
 
 save by pressing **`ctrl+x`** and then **`Y`**
 
-no&#x77;**, just start your node with start\_all.sh** - you should have a fully functional BP node!
+make the script executable and run it inside tmux so it survives disconnects:
+
+```
+chmod +x ~/cnode/scripts/node.sh
+tmux new -s cardano
+bash ~/cnode/scripts/node.sh
+```
+
+To detach from tmux: press **`ctrl+b`** then **`d`**. Reattach later with `tmux attach -t cardano`.
 {% endtab %}
 {% endtabs %}
+
+---
+
+### Important: KES key rotation
+
+{% hint style="warning" %}
+Your KES (Key Evolving Signature) keys **expire** after a set number of periods (typically 62 periods = \~1.5 days per period = \~93 days). When they expire, your BP will stop producing blocks.
+
+You must rotate your KES keys and generate a new operational certificate before they expire. Use the SPOS scripts:
+
+```bash
+cd ~/cnode/keys
+04c_genKESKeys.sh myPool cli
+04d_genNodeOpCert.sh myPool
+```
+
+Then copy the new `myPool.kes.skey` and `myPool.node.opcert` to your BP server and restart the node.
+
+Check your current KES period with:
+
+```bash
+cardano-cli query kes-period-info --mainnet \
+  --op-cert-file ~/cnode/keys/myPool.node.opcert
+```
+
+Set a calendar reminder to rotate KES keys every 80 days to stay safe.
+{% endhint %}
 
 
 

@@ -71,10 +71,8 @@ cardanonode="cardano-node"      #Path to your cardano-node you wanna use
 magicparam="--mainnet"  #choose "--mainnet" for mainnet or "--testnet-magic 1" for pre-prod
 addrformat="--mainnet"  #choose "--mainnet" for mainnet address format or "--testnet-magic 1" for pre-prod
 
-itn_jcli="./jcli" #only needed if you wanna include your ITN witness for your pool-ticker
-
 #--------- leave this next value until you have to change it for a testnet
-byronToShelleyEpochs=208 #208 for the mainnet, 74 for the testnet
+byronToShelleyEpochs=208 #208 for the mainnet, 4 for pre-prod
 EOF
 ```
 
@@ -101,8 +99,6 @@ cardanonode="cardano-node"      #Path to your cardano-node you wanna use
 
 magicparam="--testnet-magic 1"  #choose "--mainnet" for mainnet or "--testnet-magic 1" for pre-prod
 addrformat="--testnet-magic 1"  #choose "--mainnet" for mainnet address format or "--testnet-magic 1" for pre-prod
-
-itn_jcli="./jcli" #only needed if you wanna include your ITN witness for your pool-ticker
 
 #--------- leave this next value until you have to change it for a testnet
 byronToShelleyEpochs=4 #208 for the mainnet, 4 for pre-prod

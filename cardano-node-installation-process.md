@@ -35,16 +35,18 @@ curl -L -o cardano-node-10.6.2-sha256sums.txt \
 ## 2) Verify checksum
 
 ```bash
-sha256sum cardano-node-10.6.2-linux-amd64.tar.gz
+sha256sum cardano-node-10.6.2-linux-*.tar.gz
 cat cardano-node-10.6.2-sha256sums.txt
 ```
 
-Compare the tarball checksum with the official checksum file.
+Compare your tarball's checksum with the matching line in the official checksums file. They must match exactly.
 
 ## 3) Install binaries
 
+Extract the tarball you downloaded (use the correct filename for your architecture):
+
 ```bash
-tar -xzf cardano-node-10.6.2-linux-amd64.tar.gz
+tar -xzf cardano-node-10.6.2-linux-*.tar.gz
 install -m 755 ./bin/cardano-node ./bin/cardano-cli $HOME/.local/bin/
 ```
 

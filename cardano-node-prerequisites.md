@@ -16,7 +16,7 @@ sudo apt-get upgrade -y
 sudo apt-get install -y \
   curl wget jq git tmux htop nload unzip xz-utils \
   build-essential pkg-config libffi-dev libgmp-dev libssl-dev \
-  libsystemd-dev zlib1g-dev libncursesw5 libtool autoconf automake \
+  libsystemd-dev zlib1g-dev libncurses-dev libtool autoconf automake \
   libsodium-dev
 ```
 

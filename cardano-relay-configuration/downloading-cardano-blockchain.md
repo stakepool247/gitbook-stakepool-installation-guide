@@ -9,35 +9,67 @@ description: Quick way to start your Cardano node
 Synchronizing the Cardano blockchain from scratch will take a long time, depending on your CPU and network connection it could take up to several days.
 
 {% tabs %}
-{% tab title="Mithril" %}
-* Mainnet
+{% tab title="Mithril (Mainnet)" %}
+This will auto-detect architecture and fetch the latest Mithril release:
 
-```
-
-# go to your cnode folder
+```bash
 cd /home/cardano/cnode
 
-# delete current db
+# remove old db (if any)
 rm -rf db
 
-# download mithril 
-wget https://github.com/input-output-hk/mithril/releases/download/2430.0/mithril-2430.0-linux-x64.tar.gz
+# detect architecture and fetch latest Mithril version
+ARCH=$(uname -m)
+if [ "$ARCH" = "x86_64" ]; then MARCH=x64; elif [ "$ARCH" = "aarch64" ]; then MARCH=arm64; else echo "Unsupported arch: $ARCH"; exit 1; fi
 
-# unzip 
-tar -xvzf mithril-2430.0-linux-x64.tar.gz
+MITHRIL_VERSION=$(curl -s https://api.github.com/repos/input-output-hk/mithril/releases/latest | jq -r '.tag_name')
+echo "Installing mithril-client ${MITHRIL_VERSION} (${MARCH})"
 
-# Cardano network
+curl -L -o mithril.tar.gz \
+  "https://github.com/input-output-hk/mithril/releases/download/${MITHRIL_VERSION}/mithril-${MITHRIL_VERSION}-linux-${MARCH}.tar.gz"
+tar -xzf mithril.tar.gz
+install -m 755 mithril-client $HOME/.local/bin/
+rm -f mithril.tar.gz mithril-client mithril-signer mithril-aggregator mithril-relay
+
+# set Mithril environment
 export CARDANO_NETWORK=mainnet
-
-# Aggregator API endpoint URL
 export AGGREGATOR_ENDPOINT=https://aggregator.release-mainnet.api.mithril.network/aggregator
-
-# Genesis verification key
 export GENESIS_VERIFICATION_KEY=$(wget -q -O - https://raw.githubusercontent.com/input-output-hk/mithril/main/mithril-infra/configuration/release-mainnet/genesis.vkey)
+export ANCILLARY_VERIFICATION_KEY=$(wget -q -O - https://raw.githubusercontent.com/input-output-hk/mithril/main/mithril-infra/configuration/release-mainnet/ancillary.vkey)
 
-#Download snapshot
-mithril-client cardano-db download latest
+# download the latest snapshot
+mithril-client cardano-db download --include-ancillary latest
+```
 
+{% hint style="info" %}
+`--include-ancillary` downloads the last ledger state and immutable file, which significantly speeds up initial sync. The ancillary data is verified against a separate Ed25519 key.
+{% endhint %}
+{% endtab %}
+
+{% tab title="Mithril (Testnet / pre-prod)" %}
+```bash
+cd /home/cardano/cnode
+
+rm -rf db
+
+ARCH=$(uname -m)
+if [ "$ARCH" = "x86_64" ]; then MARCH=x64; elif [ "$ARCH" = "aarch64" ]; then MARCH=arm64; else echo "Unsupported arch: $ARCH"; exit 1; fi
+
+MITHRIL_VERSION=$(curl -s https://api.github.com/repos/input-output-hk/mithril/releases/latest | jq -r '.tag_name')
+echo "Installing mithril-client ${MITHRIL_VERSION} (${MARCH})"
+
+curl -L -o mithril.tar.gz \
+  "https://github.com/input-output-hk/mithril/releases/download/${MITHRIL_VERSION}/mithril-${MITHRIL_VERSION}-linux-${MARCH}.tar.gz"
+tar -xzf mithril.tar.gz
+install -m 755 mithril-client $HOME/.local/bin/
+rm -f mithril.tar.gz mithril-client mithril-signer mithril-aggregator mithril-relay
+
+export CARDANO_NETWORK=preprod
+export AGGREGATOR_ENDPOINT=https://aggregator.release-preprod.api.mithril.network/aggregator
+export GENESIS_VERIFICATION_KEY=$(wget -q -O - https://raw.githubusercontent.com/input-output-hk/mithril/main/mithril-infra/configuration/release-preprod/genesis.vkey)
+export ANCILLARY_VERIFICATION_KEY=$(wget -q -O - https://raw.githubusercontent.com/input-output-hk/mithril/main/mithril-infra/configuration/release-preprod/ancillary.vkey)
+
+mithril-client cardano-db download --include-ancillary latest
 ```
 {% endtab %}
 

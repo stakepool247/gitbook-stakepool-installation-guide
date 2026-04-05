@@ -67,7 +67,7 @@ cardano-node run \
 
 If you followed the guide, you should see the node start syncing:
 
-<figure><img src="../.gitbook/assets/CleanShot 2023-05-15 at 19.33.13@2x.jpg" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/terminal-node-sync.png" alt="cardano-node syncing from genesis"><figcaption></figcaption></figure>
 
 Press <mark style="color:blue;">ctrl+c</mark> to stop and continue to the next chapter.
 

@@ -45,7 +45,7 @@ ls -al
 
 as a result, you should see this
 
-<figure><img src="../.gitbook/assets/CleanShot 2023-05-15 at 20.18.03@2x.jpg" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/terminal-spos-ls.png" alt="SPOS scripts directory listing"><figcaption></figcaption></figure>
 
 let's copy the scripts to our bin folder, so we can call them from anywhere:
 
@@ -117,4 +117,4 @@ Let's check if you have succeeded:
 
 if you see the following output, then you have successfully installed the scripts:
 
-<figure><img src="../.gitbook/assets/CleanShot 2024-09-28 at 16.38.06@2x.jpg" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/terminal-spos-common.png" alt="00_common.sh showing cli 10.15.0.0 / node 10.6.2"><figcaption></figcaption></figure>

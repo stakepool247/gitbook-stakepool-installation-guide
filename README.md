@@ -14,7 +14,8 @@ If you are upgrading from an older release, use the upgrade section and validate
 **Quick setup:** Want to skip the copy-paste and get a relay running in minutes? Run this on a fresh Ubuntu/Debian server:
 
 ```bash
-curl -sL https://raw.githubusercontent.com/stakepool247/gitbook-stakepool-installation-guide/main/scripts/setup-relay.sh -o setup-relay.sh
+curl -sL -o setup-relay.sh \
+  https://raw.githubusercontent.com/stakepool247/gitbook-stakepool-installation-guide/main/scripts/setup-relay.sh
 sudo bash setup-relay.sh
 ```
 

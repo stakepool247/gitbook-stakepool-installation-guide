@@ -1,36 +1,43 @@
 #!/usr/bin/env bash
 #
-# Cardano Relay Node — Quick Setup Script
+# Cardano Relay Node — Interactive Setup Script
 # https://cardano-node-installation.stakepool247.eu/
 #
 # Sets up a Cardano relay node on a fresh Ubuntu/Debian server.
 #
 # Usage:
-#   sudo bash setup-relay.sh              # mainnet (default)
-#   sudo bash setup-relay.sh --preprod    # pre-prod testnet
+#   sudo bash setup-relay.sh                     # interactive TUI
+#   sudo bash setup-relay.sh --non-interactive   # use defaults (mainnet, latest stable, InMemory)
 #
-# What this does (matches the guide step by step):
+# What this does:
 #   1. Creates the 'cardano' user
 #   2. Configures swap (8GB)
 #   3. Installs required system packages
 #   4. Creates directory layout + env vars
 #   5. Downloads + installs cardano-node binaries
-#   6. Downloads network config files
+#   6. Downloads network config files + configures DB backend
 #   7. Installs Mithril client (for fast blockchain sync)
 #   8. Creates systemd service (not started — you choose when)
 #
 set -euo pipefail
 
-# ─── Config ──────────────────────────────────────────────────────────
-NODE_VERSION="10.6.2"
+# ─── Defaults ────────────────────────────────────────────────────────
+NODE_VERSION=""
 NODE_PORT=3001
 CARDANO_USER="cardano"
 NETWORK="mainnet"
+DB_BACKEND="V2InMemory"
+LMDB_BACKEND="V1LMDB"
+INTERACTIVE=true
 
 for arg in "$@"; do
   case "$arg" in
-    --preprod) NETWORK="preprod" ;;
-    --mainnet) NETWORK="mainnet" ;;
+    --preprod)          NETWORK="preprod" ;;
+    --mainnet)          NETWORK="mainnet" ;;
+    --lmdb)             DB_BACKEND="$LMDB_BACKEND" ;;
+    --inmemory)         DB_BACKEND="V2InMemory"
+LMDB_BACKEND="V1LMDB" ;;
+    --non-interactive)  INTERACTIVE=false ;;
   esac
 done
 
@@ -55,24 +62,108 @@ if [[ $EUID -ne 0 ]]; then
   exit 1
 fi
 
-BANNER_NET=$(printf "%-7s" "$NETWORK")
-echo -e "${BLUE}╔══════════════════════════════════════════════════╗${NC}"
-echo -e "${BLUE}║  Cardano Relay Node Setup                       ║${NC}"
-echo -e "${BLUE}║  cardano-node ${NODE_VERSION}  |  Network: ${BANNER_NET}     ║${NC}"
-echo -e "${BLUE}╚══════════════════════════════════════════════════╝${NC}"
-echo ""
-echo "OS:   $(lsb_release -ds 2>/dev/null || cat /etc/os-release | grep PRETTY_NAME | cut -d= -f2 | tr -d '"')"
-echo "Arch: $(uname -m)"
-echo "RAM:  $(free -h | awk '/Mem/{print $2}')"
-echo "Disk: $(df -h / | awk 'NR==2{print $4}') free"
-echo ""
+# Ensure jq and curl are available for the TUI (minimal bootstrap)
+if ! command -v jq &>/dev/null || ! command -v curl &>/dev/null; then
+  apt-get update -y -qq >/dev/null 2>&1
+  apt-get install -y -qq jq curl >/dev/null 2>&1
+fi
 
 ARCH=$(uname -m)
 case "$ARCH" in
-  x86_64)  ARTIFACT="cardano-node-${NODE_VERSION}-linux-amd64.tar.gz"; MARCH="x64" ;;
-  aarch64) ARTIFACT="cardano-node-${NODE_VERSION}-linux-arm64.tar.gz"; MARCH="arm64" ;;
+  x86_64)  ARCH_SUFFIX="linux-amd64"; MARCH="x64" ;;
+  aarch64) ARCH_SUFFIX="linux-arm64"; MARCH="arm64" ;;
   *) die "Unsupported architecture: $ARCH" ;;
 esac
+
+# ─── Fetch available versions ────────────────────────────────────────
+echo "Fetching available cardano-node releases..."
+RELEASES_JSON=$(curl -s "https://api.github.com/repos/IntersectMBO/cardano-node/releases" | \
+  jq -r '[.[:10] | .[] | select(.draft == false) | {tag: .tag_name, pre: .prerelease}]')
+
+LATEST_STABLE=$(echo "$RELEASES_JSON" | jq -r '[.[] | select(.pre == false)][0].tag')
+LATEST_PRE=$(echo "$RELEASES_JSON" | jq -r '[.[] | select(.pre == true)][0].tag // empty')
+ALL_STABLE=$(echo "$RELEASES_JSON" | jq -r '[.[] | select(.pre == false)][0:4] | .[].tag')
+
+if [[ -z "$NODE_VERSION" ]]; then
+  NODE_VERSION="$LATEST_STABLE"
+fi
+
+# ─── Interactive TUI ─────────────────────────────────────────────────
+if $INTERACTIVE && command -v whiptail &>/dev/null; then
+
+  # 1) Network selection
+  NETWORK=$(whiptail --title "Cardano Relay Setup" \
+    --menu "Select network:" 12 60 3 \
+    "mainnet"  "Production network" \
+    "preprod"  "Pre-production testnet" \
+    3>&1 1>&2 2>&3) || exit 1
+
+  # 2) Version selection — build menu items
+  VERSION_ARGS=()
+  for v in $ALL_STABLE; do
+    if [[ "$v" == "$LATEST_STABLE" ]]; then
+      VERSION_ARGS+=("$v" "latest stable (recommended)")
+    else
+      VERSION_ARGS+=("$v" "stable")
+    fi
+  done
+  if [[ -n "$LATEST_PRE" ]]; then
+    VERSION_ARGS+=("$LATEST_PRE" "pre-release (testnet only)")
+  fi
+
+  NODE_VERSION=$(whiptail --title "Cardano Relay Setup" \
+    --menu "Select cardano-node version:" 16 60 ${#VERSION_ARGS[@]} \
+    "${VERSION_ARGS[@]}" \
+    3>&1 1>&2 2>&3) || exit 1
+
+  # 3) DB backend selection
+  RAM_MB=$(free -m | awk '/Mem/{print $2}')
+  if [[ $RAM_MB -ge 20000 ]]; then
+    REC_MEM="recommended for your ${RAM_MB}MB RAM"
+    REC_LMDB="uses less RAM but slower"
+  else
+    REC_MEM="needs 24GB+ RAM (you have ${RAM_MB}MB)"
+    REC_LMDB="recommended for your ${RAM_MB}MB RAM"
+  fi
+
+  DB_BACKEND=$(whiptail --title "Cardano Relay Setup" \
+    --menu "Select ledger DB backend:" 14 70 2 \
+    "V2InMemory"  "In-memory  — fast, ${REC_MEM}" \
+    "$LMDB_BACKEND" "LMDB on-disk — ${REC_LMDB}" \
+    3>&1 1>&2 2>&3) || exit 1
+
+  # 4) Confirmation
+  if [[ "$DB_BACKEND" == "V2InMemory" ]]; then
+    DB_LABEL="InMemory (24GB+ RAM)"
+  else
+    DB_LABEL="LMDB OnDisk (8GB+ RAM)"
+  fi
+
+  whiptail --title "Confirm Setup" \
+    --yesno "Ready to install:\n\n  Network:    ${NETWORK}\n  Version:    cardano-node ${NODE_VERSION}\n  DB Backend: ${DB_LABEL}\n  Arch:       ${ARCH}\n\nProceed?" 15 50 || exit 1
+fi
+
+# ─── Build artifact name ─────────────────────────────────────────────
+ARTIFACT="cardano-node-${NODE_VERSION}-${ARCH_SUFFIX}.tar.gz"
+
+# ─── Banner ──────────────────────────────────────────────────────────
+if [[ "$DB_BACKEND" == "V2InMemory" ]]; then
+  DB_LABEL="InMemory"
+else
+  DB_LABEL="LMDB"
+fi
+
+echo ""
+echo -e "${BLUE}╔══════════════════════════════════════════════════════╗${NC}"
+echo -e "${BLUE}║  Cardano Relay Node Setup                           ║${NC}"
+echo -e "${BLUE}║  Node: ${NODE_VERSION}  Network: ${NETWORK}  DB: ${DB_LABEL}$(printf '%*s' $((14 - ${#NETWORK} - ${#DB_LABEL})) '')║${NC}"
+echo -e "${BLUE}╚══════════════════════════════════════════════════════╝${NC}"
+echo ""
+echo "OS:   $(lsb_release -ds 2>/dev/null || grep PRETTY_NAME /etc/os-release | cut -d= -f2 | tr -d '"')"
+echo "Arch: $ARCH"
+echo "RAM:  $(free -h | awk '/Mem/{print $2}')"
+echo "Disk: $(df -h / | awk 'NR==2{print $4}') free"
+echo ""
 
 # ─── 1. User ────────────────────────────────────────────────────────
 step 1 "Creating user '$CARDANO_USER'"
@@ -99,6 +190,7 @@ else
   grep -q '/swapfile' /etc/fstab || echo '/swapfile none swap sw 0 0' >> /etc/fstab
   grep -q 'vm.swappiness' /etc/sysctl.conf || echo 'vm.swappiness=10' >> /etc/sysctl.conf
   grep -q 'vm.vfs_cache_pressure' /etc/sysctl.conf || echo 'vm.vfs_cache_pressure=50' >> /etc/sysctl.conf
+  sysctl -p >/dev/null 2>&1
   ok "8GB swap created and enabled"
 fi
 
@@ -141,13 +233,15 @@ echo "  Downloading ${ARTIFACT}..."
 curl -sL -o "$ARTIFACT" \
   "https://github.com/IntersectMBO/cardano-node/releases/download/${NODE_VERSION}/${ARTIFACT}"
 curl -sL -o checksums.txt \
-  "https://github.com/IntersectMBO/cardano-node/releases/download/${NODE_VERSION}/cardano-node-${NODE_VERSION}-sha256sums.txt"
+  "https://github.com/IntersectMBO/cardano-node/releases/download/${NODE_VERSION}/cardano-node-${NODE_VERSION}-sha256sums.txt" 2>/dev/null || true
 
-# Verify checksum
-EXPECTED=$(grep "$ARTIFACT" checksums.txt | awk '{print $1}')
-ACTUAL=$(sha256sum "$ARTIFACT" | awk '{print $1}')
-if [[ -n "$EXPECTED" && "$EXPECTED" != "$ACTUAL" ]]; then
-  die "Checksum mismatch! Expected: $EXPECTED Got: $ACTUAL"
+# Verify checksum if available
+if [[ -f checksums.txt ]]; then
+  EXPECTED=$(grep "$ARTIFACT" checksums.txt | awk '{print $1}')
+  ACTUAL=$(sha256sum "$ARTIFACT" | awk '{print $1}')
+  if [[ -n "$EXPECTED" && "$EXPECTED" != "$ACTUAL" ]]; then
+    die "Checksum mismatch! Expected: $EXPECTED Got: $ACTUAL"
+  fi
 fi
 
 tar -xzf "$ARTIFACT"
@@ -157,8 +251,8 @@ install -m 755 ./bin/cardano-node ./bin/cardano-cli /home/cardano/.local/bin/
 NODE_VER=$(run_as_cardano '$HOME/.local/bin/cardano-node --version' 2>&1 | head -1)
 ok "$NODE_VER"
 
-# ─── 6. Config files ────────────────────────────────────────────────
-step 6 "Installing network configuration files ($NETWORK)"
+# ─── 6. Config files + DB backend ──────────────────────────────────
+step 6 "Installing network configuration files ($NETWORK, $DB_LABEL)"
 
 CNODE_HOME="/home/cardano/cnode"
 
@@ -171,8 +265,17 @@ else
   done
 fi
 
+# Set the DB backend in config.json
+if command -v jq &>/dev/null && [[ -f "$CNODE_HOME/config/config.json" ]]; then
+  jq --arg backend "$DB_BACKEND" '.LedgerDB.Backend = $backend' \
+    "$CNODE_HOME/config/config.json" > "$CNODE_HOME/config/config.json.tmp" \
+    && mv "$CNODE_HOME/config/config.json.tmp" "$CNODE_HOME/config/config.json"
+  ok "Config files installed (LedgerDB backend: $DB_BACKEND)"
+else
+  ok "Config files installed"
+fi
+
 chown -R "$CARDANO_USER:$CARDANO_USER" "$CNODE_HOME"
-ok "Config files installed"
 
 # Clean up download dir
 rm -rf "$DOWNLOAD_DIR"
@@ -231,35 +334,55 @@ systemctl daemon-reload
 systemctl enable cardano-node.service >/dev/null
 ok "Service created and enabled (not started yet)"
 
+# ─── Mithril environment helper ─────────────────────────────────────
+if [[ "$NETWORK" == "mainnet" ]]; then
+  MITHRIL_NET="mainnet"
+  MITHRIL_AGG="https://aggregator.release-mainnet.api.mithril.network/aggregator"
+  MITHRIL_VKEY_PATH="release-mainnet"
+  CLI_NET="--mainnet"
+else
+  MITHRIL_NET="preprod"
+  MITHRIL_AGG="https://aggregator.release-preprod.api.mithril.network/aggregator"
+  MITHRIL_VKEY_PATH="release-preprod"
+  CLI_NET="--testnet-magic 1"
+fi
+
 # ─── Done ────────────────────────────────────────────────────────────
 echo ""
-echo -e "${GREEN}══════════════════════════════════════════════════${NC}"
+echo -e "${GREEN}══════════════════════════════════════════════════════${NC}"
 echo -e "${GREEN}  Relay node setup complete!${NC}"
-echo -e "${GREEN}══════════════════════════════════════════════════${NC}"
+echo -e "${GREEN}══════════════════════════════════════════════════════${NC}"
 echo ""
 echo "  The node is installed but NOT started yet."
 echo "  Before starting, you may want to:"
 echo ""
-echo "  1) Edit topology:    nano /home/cardano/cnode/config/topology.json"
-echo "  2) Download the blockchain with Mithril (much faster than syncing from genesis):"
+echo -e "  ${YELLOW}1) Download blockchain with Mithril${NC} (much faster than syncing from genesis):"
 echo ""
 echo -e "     ${BLUE}su - cardano${NC}"
-echo -e "     ${BLUE}# Follow the Mithril download section in the guide${NC}"
+echo -e "     ${BLUE}cd ~/cnode && rm -rf db${NC}"
+echo -e "     ${BLUE}export CARDANO_NETWORK=${MITHRIL_NET}${NC}"
+echo -e "     ${BLUE}export AGGREGATOR_ENDPOINT=${MITHRIL_AGG}${NC}"
+echo -e "     ${BLUE}export GENESIS_VERIFICATION_KEY=\$(wget -q -O - https://raw.githubusercontent.com/input-output-hk/mithril/main/mithril-infra/configuration/${MITHRIL_VKEY_PATH}/genesis.vkey)${NC}"
+echo -e "     ${BLUE}export ANCILLARY_VERIFICATION_KEY=\$(wget -q -O - https://raw.githubusercontent.com/input-output-hk/mithril/main/mithril-infra/configuration/${MITHRIL_VKEY_PATH}/ancillary.vkey)${NC}"
+echo -e "     ${BLUE}mithril-client cardano-db download --include-ancillary latest${NC}"
 echo ""
-echo "  When ready, start the node:"
+echo -e "  ${YELLOW}2) Edit topology${NC} (add your BP/other relays):"
+echo -e "     ${BLUE}nano /home/cardano/cnode/config/topology.json${NC}"
 echo ""
+echo -e "  ${YELLOW}3) Start the node:${NC}"
 echo -e "     ${BLUE}sudo systemctl start cardano-node${NC}"
 echo ""
 echo "  Useful commands:"
 echo "    Check logs:     journalctl -u cardano-node -f"
-if [[ "$NETWORK" == "mainnet" ]]; then
-  CLI_NET="--mainnet"
-else
-  CLI_NET="--testnet-magic 1"
-fi
 echo "    Check sync:     su - cardano -c 'cardano-cli query tip ${CLI_NET}'"
 echo "    Stop node:      sudo systemctl stop cardano-node"
 echo "    Restart node:   sudo systemctl restart cardano-node"
+echo ""
+echo "  Configuration:"
+echo "    Network:        $NETWORK"
+echo "    Node version:   $NODE_VERSION"
+echo "    DB backend:     $DB_BACKEND"
+echo "    Config dir:     /home/cardano/cnode/config/"
 echo ""
 echo "  Next steps:"
 echo "    - Set up firewall (ufw allow 22/tcp && ufw allow ${NODE_PORT}/tcp && ufw enable)"

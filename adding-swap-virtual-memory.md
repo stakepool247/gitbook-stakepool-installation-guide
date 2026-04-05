@@ -23,7 +23,7 @@ swapon -s
 if instead of an empty response you get something similar to this, then it means **you already have enabled swap space and you should skip this section** and move to the next one.
 {% endhint %}
 
-![Example of enabled swap](<.gitbook/assets/image (10).png>)
+![Example of enabled swap](<.gitbook/assets/terminal-swap-swapon.png>)
 
 {% hint style="info" %}
 The SWAP should not be seen as a replacement for physical memory (RAM). Since swap space is a section of the hard drive, it has a significantly slower speed than regular RAM. If your server constantly runs out of RAM, you should be adding more RAM to it
@@ -64,7 +64,7 @@ sudo swapon --show
 
 now you can also check with the  `htop` command and you should see the used and total swap space
 
-![](<.gitbook/assets/CleanShot 2021-04-07 at 23.08.17.png>)
+![](<.gitbook/assets/terminal-swap-show.png>)
 
 6\. Let's also tune swap behavior so the system prefers real RAM and only uses swap under pressure:
 

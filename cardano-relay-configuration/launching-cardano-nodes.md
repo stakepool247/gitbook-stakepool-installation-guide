@@ -73,27 +73,72 @@ Ideally, run 2 relay nodes for each block producer:
 
 ### Topology: connecting your relays to your BP
 
-After you set up your block producer, you'll need to add it as a **local root peer** in each relay's `topology.json`. Edit `~/cnode/config/topology.json` on each relay and add your BP's private IP under `localRoots`:
+After you set up your block producer, you need to edit `topology.json` on **each** server so they know about each other.
+
+#### On each relay — add your BP as a local root peer
+
+Edit `~/cnode/config/topology.json` on each relay. Add your BP's **private IP** to the `localRoots` section (replace the empty `accessPoints`):
 
 ```json
-"localRoots": [
-  { "accessPoints": [
-      { "address": "YOUR_BP_PRIVATE_IP", "port": 3001 }
-    ],
-    "advertise": false,
-    "trustable": true,
-    "valency": 1
-  }
-]
+{
+  "bootstrapPeers": [
+    { "address": "backbone.cardano.iog.io", "port": 3001 },
+    { "address": "backbone.mainnet.cardanofoundation.org", "port": 3001 },
+    { "address": "backbone.mainnet.emurgornd.com", "port": 3001 }
+  ],
+  "localRoots": [
+    {
+      "accessPoints": [
+        { "address": "YOUR_BP_PRIVATE_IP", "port": 3001 }
+      ],
+      "advertise": false,
+      "trustable": false,
+      "valency": 1
+    }
+  ],
+  "peerSnapshotFile": "peer-snapshot.json",
+  "publicRoots": [
+    { "accessPoints": [], "advertise": false }
+  ],
+  "useLedgerAfterSlot": 177724800
+}
 ```
 
-Similarly, on your BP's `topology.json`, add your relay IPs as local roots and set `useLedgerAfterSlot` to `-1` (BP should never connect to random peers):
+#### On the BP — add your relays and disable ledger peers
+
+Edit `~/cnode/config/topology.json` on your BP. Add **both relay IPs** and set `useLedgerAfterSlot` to `-1` so the BP **only** connects to your relays and never to random peers:
 
 ```json
-"useLedgerAfterSlot": -1
+{
+  "bootstrapPeers": [],
+  "localRoots": [
+    {
+      "accessPoints": [
+        { "address": "YOUR_RELAY1_IP", "port": 3001 },
+        { "address": "YOUR_RELAY2_IP", "port": 3001 }
+      ],
+      "advertise": false,
+      "trustable": false,
+      "valency": 2
+    }
+  ],
+  "peerSnapshotFile": "peer-snapshot.json",
+  "publicRoots": [
+    { "accessPoints": [], "advertise": false }
+  ],
+  "useLedgerAfterSlot": -1
+}
 ```
 
-After editing topology, restart the node: `sudo systemctl restart cardano-node`
+{% hint style="warning" %}
+**Important:** set `valency` to the number of relays you have. If you have 2 relays, use `"valency": 2` so the BP maintains connections to both.
+{% endhint %}
+
+After editing topology on any server, restart the node:
+
+```
+sudo systemctl restart cardano-node
+```
 
 {% hint style="danger" %}
 **NEVER generate your wallet and stake pool keys on your online servers!** Use an offline (air-gapped) machine running Ubuntu, or a hardware wallet (Trezor/Ledger). Anyone with access to your keys has full control over your pool and funds.

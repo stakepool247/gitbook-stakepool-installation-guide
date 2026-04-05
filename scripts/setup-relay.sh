@@ -175,7 +175,13 @@ else
   ok "User created"
 fi
 usermod -aG sudo "$CARDANO_USER"
-ok "User '$CARDANO_USER' is in sudo group"
+
+# Allow passwordless sudo for cardano user (needed since we create with --disabled-password)
+if [[ ! -f /etc/sudoers.d/cardano ]]; then
+  echo "cardano ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/cardano
+  chmod 440 /etc/sudoers.d/cardano
+fi
+ok "User '$CARDANO_USER' has sudo access (passwordless)"
 
 # ─── 2. Swap ────────────────────────────────────────────────────────
 step 2 "Configuring swap"

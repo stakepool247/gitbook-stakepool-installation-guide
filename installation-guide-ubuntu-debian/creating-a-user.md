@@ -25,10 +25,17 @@ Congratulations - we just created our new user! Now - let's give this user admin
 sudo usermod -aG sudo cardano
 ```
 
-Great! Now the user cardano has administrative power! Whenever we need to run a command with administrative privilege-  run the command by adding in front of it additional command - **sudo**
+Great! Now the user cardano has administrative power! Whenever we need to run a command with administrative privilege — run the command by adding **sudo** in front of it.
 
-{% hint style="info" %}
-_**Sudo**_**,** the one command to rule them all. It stands for “super user do!” Pronounced like “sue dough”. **allows a permitted user to execute a command as root user (administrator/superuser)** allows a permitted user to execute a command as root user (administrator/super user)
+If you created the user without a password (e.g. via the quick setup script), enable passwordless sudo so the cardano user can run admin commands:
+
+```
+echo 'cardano ALL=(ALL) NOPASSWD:ALL' | sudo tee /etc/sudoers.d/cardano
+sudo chmod 440 /etc/sudoers.d/cardano
+```
+
+{% hint style=”info” %}
+**Sudo** stands for “super user do” — it allows a permitted user to execute a command as root (administrator).
 {% endhint %}
 
 Let's switch to our new user:

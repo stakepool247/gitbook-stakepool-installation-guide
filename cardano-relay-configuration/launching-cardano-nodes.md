@@ -77,36 +77,36 @@ After you set up your block producer, you need to edit `topology.json` on **each
 
 #### On each relay — add your BP as a local root peer
 
-Edit `~/cnode/config/topology.json` on each relay. Add your BP's **private IP** to the `localRoots` section (replace the empty `accessPoints`):
+Edit `~/cnode/config/topology.json` on each relay. Add your BP's **private IP** in the first `localRoots` group (your own infrastructure, `trustable: true`). You can optionally add a second group with friendly pool relays:
 
 ```json
 {
   "bootstrapPeers": [
     { "address": "backbone.cardano.iog.io", "port": 3001 },
-    { "address": "backbone.mainnet.cardanofoundation.org", "port": 3001 },
-    { "address": "backbone.mainnet.emurgornd.com", "port": 3001 }
+    { "address": "backbone.mainnet.emurgornd.com", "port": 3001 },
+    { "address": "backbone.mainnet.cardanofoundation.org", "port": 3001 }
   ],
   "localRoots": [
     {
       "accessPoints": [
-        { "address": "YOUR_BP_PRIVATE_IP", "port": 3001 }
+        { "address": "YOUR_BP_PRIVATE_IP", "port": 3001, "description": "my BP" },
+        { "address": "YOUR_OTHER_RELAY_IP", "port": 3001, "description": "my relay 2" }
       ],
       "advertise": false,
-      "trustable": false,
-      "valency": 1
+      "trustable": true,
+      "hotValency": 2
     }
   ],
-  "peerSnapshotFile": "peer-snapshot.json",
   "publicRoots": [
     { "accessPoints": [], "advertise": false }
   ],
-  "useLedgerAfterSlot": 177724800
+  "useLedgerAfterSlot": 128908821
 }
 ```
 
-#### On the BP — add your relays and disable ledger peers
+#### On the BP — add your relays only
 
-Edit `~/cnode/config/topology.json` on your BP. Add **both relay IPs** and set `useLedgerAfterSlot` to `-1` so the BP **only** connects to your relays and never to random peers:
+Edit `~/cnode/config/topology.json` on your BP. Add **all your relay IPs** and set `useLedgerAfterSlot` to `-1` so the BP **only** connects to your relays and never to random peers. Remove `bootstrapPeers` entries:
 
 ```json
 {
@@ -114,15 +114,14 @@ Edit `~/cnode/config/topology.json` on your BP. Add **both relay IPs** and set `
   "localRoots": [
     {
       "accessPoints": [
-        { "address": "YOUR_RELAY1_IP", "port": 3001 },
-        { "address": "YOUR_RELAY2_IP", "port": 3001 }
+        { "address": "YOUR_RELAY1_IP", "port": 3001, "description": "relay 1" },
+        { "address": "YOUR_RELAY2_IP", "port": 3001, "description": "relay 2" }
       ],
       "advertise": false,
-      "trustable": false,
-      "valency": 2
+      "trustable": true,
+      "hotValency": 2
     }
   ],
-  "peerSnapshotFile": "peer-snapshot.json",
   "publicRoots": [
     { "accessPoints": [], "advertise": false }
   ],
@@ -130,8 +129,12 @@ Edit `~/cnode/config/topology.json` on your BP. Add **both relay IPs** and set `
 }
 ```
 
-{% hint style="warning" %}
-**Important:** set `valency` to the number of relays you have. If you have 2 relays, use `"valency": 2` so the BP maintains connections to both.
+{% hint style="info" %}
+**`hotValency`** — the number of peers the node will actively maintain connections to. Set it to the number of your own nodes in that group.
+
+**`trustable: true`** — use this for your own infrastructure (BP and relays). For external/friendly pool peers, use `trustable: false`.
+
+**`useLedgerAfterSlot: -1`** on the BP prevents it from discovering and connecting to random peers. Your BP should only talk to your own relays.
 {% endhint %}
 
 After editing topology on any server, restart the node:

@@ -17,7 +17,7 @@ sudo adduser cardano
 
 by executing this command  you will be requested to enter your password and then to set a password for this user as well as additional information
 
-![](<../.gitbook/assets/CleanShot 2020-08-08 at 13.05.29@2x.png>)
+![](<../.gitbook/assets/terminal-adduser.png>)
 
 Congratulations - we just created our new user! Now - let's give this user administrative power by typing this:&#x20;
 

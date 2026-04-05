@@ -1,31 +1,30 @@
 # Table of contents
 
-* [Cardano Node 10.6.2](README.md)
+* [Cardano Stake Pool Guide](README.md)
 
 ## Installation Guide (Ubuntu / Debian)
 
-* [Creating a user for Cardano Node](installation-guide-ubuntu-debian/creating-a-user.md)
+* [Creating the cardano user](installation-guide-ubuntu-debian/creating-a-user.md)
 
 ***
 
-* [Adding SWAP (virtual ) memory](adding-swap-virtual-memory.md)
-* [Getting ready to install the Cardano Node (v10.6.2)](cardano-node-prerequisites.md)
-* [Cardano Node Installation process](cardano-node-installation-process.md)
+* [Configuring swap space](adding-swap-virtual-memory.md)
+* [Prerequisites](cardano-node-prerequisites.md)
+* [Installing cardano-node 10.6.2](cardano-node-installation-process.md)
 
 ## Cardano Relay Configuration
 
-* [Cardano Relay Configuration](cardano-relay-configuration/cardano-node-configuration.md)
-* [Downloading Cardano Blockchain](cardano-relay-configuration/downloading-cardano-blockchain.md)
-* [Launching Cardano Relay Node](cardano-relay-configuration/launching-cardano-nodes.md)
+* [Relay configuration](cardano-relay-configuration/cardano-node-configuration.md)
+* [Downloading the blockchain](cardano-relay-configuration/downloading-cardano-blockchain.md)
+* [Launching the relay node](cardano-relay-configuration/launching-cardano-nodes.md)
 
-## Cardano Block Producer configuration
+## Cardano Block Producer Configuration
 
-* [Installing the StakePool Operator Scripts (SPOS)](cardano-block-producer-configuration/stakepool-operator-scripts-spos.md)
+* [Installing SPOS scripts](cardano-block-producer-configuration/stakepool-operator-scripts-spos.md)
 * [Generating wallet keys](cardano-block-producer-configuration/generating-wallet-keys.md)
-* [Generating Cardano Block producer keys](cardano-block-producer-configuration/generating-cardano-block-producer-keys.md)
-* [Launching your Cardano BP node!](cardano-block-producer-configuration/launching-your-cardano-bp-node.md)
+* [Generating block producer keys](cardano-block-producer-configuration/generating-cardano-block-producer-keys.md)
+* [Launching the block producer](cardano-block-producer-configuration/launching-your-cardano-bp-node.md)
 
 ## Cardano Node Upgrades
 
-* [Upgrade to 10.6.2 (recommended)](cardano-node-upgrades/upgrade-to-10.6.2.md)
-
+* [Upgrade to 10.6.2](cardano-node-upgrades/upgrade-to-10.6.2.md)

@@ -1,12 +1,18 @@
 ---
-description: Safe upgrade guide from older 8.x/9.x/10.x nodes to cardano-node 10.6.2
+description: Safe upgrade guide from older 8.x/9.x/10.x nodes to cardano-node 10.6.2.
 ---
 
-# Upgrade to 10.6.2 (safe operator flow)
+# Upgrade to cardano-node 10.6.2
 
-This guide upgrades an existing relay/BP to **cardano-node 10.6.2** with minimal downtime.
+This guide upgrades an existing relay or block producer to **cardano-node 10.6.2** with minimal downtime.
+
+{% hint style="info" %}
+Upgrade your **relay nodes first**, then the block producer. This keeps the pool producing blocks while you validate the new version on relays.
+{% endhint %}
 
 ## 0) Pre-checks
+
+Record current versions and confirm the node is healthy before proceeding:
 
 ```bash
 cardano-node --version
@@ -14,9 +20,7 @@ cardano-cli --version
 systemctl status cardano-node --no-pager
 ```
 
-Record current versions and ensure node is healthy before upgrade.
-
-## 1) Download + verify release artifact
+## 1) Download and verify the release artifact
 
 ```bash
 cd /tmp
@@ -30,9 +34,9 @@ sha256sum "$FILE"
 cat cardano-node-10.6.2-sha256sums.txt
 ```
 
-Ensure checksum matches exactly.
+Verify the checksum matches exactly before continuing.
 
-## 2) Backup binaries + configs
+## 2) Back up binaries and configs
 
 ```bash
 sudo cp -a /home/cardano/.local/bin/cardano-node /home/cardano/.local/bin/cardano-node.bak.$(date +%F-%H%M) || true
@@ -57,7 +61,7 @@ cp ./share/mainnet/* /home/cardano/cnode/config/
 
 For pre-prod testnet, use `./share/preprod/*` instead.
 
-## 5) Restart node
+## 5) Restart the node
 
 ```bash
 sudo systemctl daemon-reload
@@ -77,6 +81,12 @@ cardano-cli query tip --mainnet --socket-path /home/cardano/cnode/sockets/node.s
 
 ## 7) Rollback (if needed)
 
+List your backup files and restore the previous version:
+
+```bash
+ls /home/cardano/.local/bin/cardano-node.bak.*
+```
+
 ```bash
 sudo systemctl stop cardano-node
 cp -a /home/cardano/.local/bin/cardano-node.bak.YYYY-MM-DD-HHMM /home/cardano/.local/bin/cardano-node
@@ -84,10 +94,14 @@ cp -a /home/cardano/.local/bin/cardano-cli.bak.YYYY-MM-DD-HHMM /home/cardano/.lo
 sudo systemctl start cardano-node
 ```
 
+Replace `YYYY-MM-DD-HHMM` with the actual backup timestamp from the listing above.
+
 ---
 
-### Notes for 10.6.2
+## Notes
 
-- Source builders must use **libblst 0.3.14**.
-- `cardano-cli` version may differ from node version (this is expected in current packaging).
-- Upgrade relay first, then BP (for safer pool operations).
+| Topic | Detail |
+|-------|--------|
+| Source builds | Must use **libblst 0.3.14** |
+| CLI version | `cardano-cli` version may differ from node version (expected in current packaging) |
+| Upgrade order | Relay first, then BP |

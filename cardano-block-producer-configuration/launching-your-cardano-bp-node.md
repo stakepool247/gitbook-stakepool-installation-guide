@@ -1,38 +1,37 @@
 ---
-description: let's launch your block producing node!
+description: Configure and launch the block producer as a systemd service.
 ---
 
-# Launching your Cardano BP node!
+# Launching the block producer
 
-when all the certificates and keys are generated, now we have to adjust the launch script on our block producing node&#x20;
+With keys and certificates generated, transfer them to your BP server and start the node.
 
-copy following files to your BP server and place them under **/home/$USER/cnode/keys/**
+## 1) Transfer keys to the BP server
 
-* myPool.kes-000.skey
-* myPool.vrf.skey
-* myPool.node-000.opcert
+Copy these files to `/home/cardano/cnode/keys/` on your block producer:
 
-rename keys to default names so you don't have to edit your script/service config&#x20;
+| Source file | Destination |
+|-------------|-------------|
+| `myPool.kes-000.skey` | `myPool.kes.skey` |
+| `myPool.vrf.skey` | `myPool.vrf.skey` |
+| `myPool.node-000.opcert` | `myPool.node.opcert` |
 
-```
+Rename and secure the files:
+
+```bash
 cd ~/cnode/keys
 mv myPool.kes-000.skey myPool.kes.skey
 mv myPool.node-000.opcert myPool.node.opcert
-
-# setting read only access to ourselves and restrictin any access for other users
 chmod 400 *
 ```
 
-there are 2 ways you can launch your node:
-
-1. launching as a script using tmux (recommended only for testnet or for any other **non-production server** )
-2. launching as a system service **(RECOMENDED on production servers**)&#x20;
+## 2) Create the systemd service
 
 {% tabs %}
-{% tab title="Launching as Systemd Service" %}
-create a **systemd** service configuration file with all the keys and other settings, so the **cardano node process will be running in the background:**
+{% tab title="Systemd service (recommended)" %}
+Create the service file:
 
-```
+```bash
 cat <<EOF | sudo tee /etc/systemd/system/cardano-node.service
 [Unit]
 Description=Cardano Block Producer
@@ -68,48 +67,41 @@ WantedBy=multi-user.target
 EOF
 ```
 
+Enable and start:
 
-
-If you haven't previously installed systemd service, then let's do it now and start the cardano node service as a system service
-
-```
+```bash
+sudo systemctl daemon-reload
 sudo systemctl enable cardano-node.service
 sudo systemctl start cardano-node.service
 ```
 
-if you have **previously already installed  systemd service**, then you just need to reload the configuration and restart the node
+If updating an existing service, reload and restart:
 
-```
-sudo systemctl daemon-reload 
+```bash
+sudo systemctl daemon-reload
 sudo systemctl restart cardano-node.service
 ```
 
+Check the logs:
 
-
-![](<../.gitbook/assets/image (32).png>)
-
-you can check the cardano nodes live logfile using journalctl
-
-```
+```bash
 journalctl -u cardano-node.service -f -o cat
 ```
 
-congratulations! you have installed a block-producing node!
+![](<../.gitbook/assets/image (32).png>)
 {% endtab %}
 
-{% tab title="Launching from script" %}
+{% tab title="Script with tmux (testnet only)" %}
+Create the launch script:
 
-
-```
+```bash
 cd ~/cnode/scripts
 nano node.sh
 ```
 
-and add the keys to your launch script
-
-```
+```bash
 #!/bin/bash
-  
+
 cardano-node run \
  --database-path ~/cnode/db \
  --socket-path ~/cnode/sockets/node.socket \
@@ -122,28 +114,34 @@ cardano-node run \
  --shelley-operational-certificate ~/cnode/keys/myPool.node.opcert
 ```
 
-save by pressing **`ctrl+x`** and then **`Y`**
+Make it executable and run inside tmux:
 
-make the script executable and run it inside tmux so it survives disconnects:
-
-```
+```bash
 chmod +x ~/cnode/scripts/node.sh
 tmux new -s cardano
 bash ~/cnode/scripts/node.sh
 ```
 
-To detach from tmux: press **`ctrl+b`** then **`d`**. Reattach later with `tmux attach -t cardano`.
+Detach from tmux: **Ctrl+B** then **D**. Reattach later with `tmux attach -t cardano`.
 {% endtab %}
 {% endtabs %}
 
 ---
 
-### Important: KES key rotation
+## KES key rotation
 
 {% hint style="warning" %}
-Your KES (Key Evolving Signature) keys **expire** after a set number of periods (typically 62 periods = \~1.5 days per period = \~93 days). When they expire, your BP will stop producing blocks.
+KES (Key Evolving Signature) keys **expire** after a set number of periods (typically 62 periods, approximately 93 days). When they expire, your BP stops producing blocks.
+{% endhint %}
 
-You must rotate your KES keys and generate a new operational certificate before they expire. Use the SPOS scripts:
+Check your current KES status:
+
+```bash
+cardano-cli query kes-period-info --mainnet \
+  --op-cert-file ~/cnode/keys/myPool.node.opcert
+```
+
+To rotate, generate new KES keys and operational certificate on your **offline machine**:
 
 ```bash
 cd ~/cnode/keys
@@ -151,17 +149,6 @@ cd ~/cnode/keys
 04d_genNodeOpCert.sh myPool
 ```
 
-Then copy the new `myPool.kes.skey` and `myPool.node.opcert` to your BP server and restart the node.
+Transfer the new `myPool.kes.skey` and `myPool.node.opcert` to your BP server and restart the node.
 
-Check your current KES period with:
-
-```bash
-cardano-cli query kes-period-info --mainnet \
-  --op-cert-file ~/cnode/keys/myPool.node.opcert
-```
-
-Set a calendar reminder to rotate KES keys every 80 days to stay safe.
-{% endhint %}
-
-
-
+Set a calendar reminder to rotate KES keys **every 80 days** to stay ahead of expiration.

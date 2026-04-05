@@ -1,128 +1,130 @@
 ---
-description: Let's create our pool keys
+description: Generate node keys, VRF keys, KES keys, operational certificate, and register your stake pool.
 ---
 
-# Generating Cardano Block producer keys
+# Generating block producer keys
 
-With SPOS scripts this task is a super easy task:
+## 1) Generate node, VRF, and KES keys
 
-```
+```bash
 04a_genNodeKeys.sh myPool cli
-04b_genVRFKeys.sh myPool cli 
+04b_genVRFKeys.sh myPool cli
 04c_genKESKeys.sh myPool cli
 04d_genNodeOpCert.sh myPool
 
-# let's see generated files
 ls -al myPool*
 ```
 
 ![](<../.gitbook/assets/image (3).png>)
 
-Now you have generated your pool keys!&#x20;
+## 2) Generate the pool certificate
 
-### StakePool certificate generation
+Run the certificate generation script:
 
-```
+```bash
 05a_genStakepoolCert.sh myPool
 ```
 
-This command will generate a template that you have to fill in so we can generate a valid pool certificate
+This creates a JSON template (`myPool.pool.json`). Edit it with your pool's details:
+
+```bash
+nano myPool.pool.json
+```
 
 ![](<../.gitbook/assets/image (20).png>)
 
-```
-nano myPool.pool.json 
-```
+Example configuration for a single-owner pool:
 
-I'm creating a **single owner pool** with the following configuration:
-
-* **Pools Pledge:** 1mil ADA (will be held in **poolOwner address**)
-* **Fixed Fee**: 340 ADA (This is currently the minimum you can set)
-* **Pools Margin:** 5%&#x20;
-* **2 IP relays**: 89.191.111.111 and 89.191.111.112, both will run on port 3001
-* **Pool's TICKER:** XPOOL
-* **short and long descriptions:** "My Testnet Pool #2",  "This pool is used for the guide i created",
-* **main metadata** file will be stored at the following url: [https://www.stakepool247.eu/xpool-testnet.metadata.json](https://www.stakepool247.eu/xpool-testnet.metadata.json)
-* **extended metadata** (used by adapools, pooltool, and other services): [https://www.stakepool247.eu/xpool-testnet.extended.json](https://www.stakepool247.eu/xpool-testnet.extended.json)
+| Parameter | Example value |
+|-----------|--------------|
+| Pledge | 1,000,000 ADA |
+| Fixed fee | 340 ADA (current minimum) |
+| Margin | 5% |
+| Relays | IP-based: 89.191.111.111:3001, 89.191.111.112:3001 |
+| Ticker | XPOOL |
+| Metadata URL | https://yoursite.com/pool.metadata.json |
+| Extended metadata URL | https://yoursite.com/pool.extended.json |
 
 ![](<../.gitbook/assets/image (27).png>)
 
-Let's run again the same command
+After editing, re-run the certificate generation:
 
-```
+```bash
 05a_genStakepoolCert.sh myPool
 ```
 
 ![](<../.gitbook/assets/image (17).png>)
 
-as we previously didn't have an **extended metadata file,** the script created a template, which we will edit and re-run the command once again.&#x20;
+The script creates an extended metadata template. Edit it:
 
+```bash
+nano myPool.additional-metadata.json
 ```
-05a_genStakepoolCert.sh myPool
-```
-
-edit it so it corresponds to your needs, this file is just for additional information.
 
 ![](<../.gitbook/assets/image (6).png>)
 
-when you have edited it, let's run the same command again:
+Run the certificate generation one final time:
 
-```
-nano myPool.additional-metadata.json 
+```bash
+05a_genStakepoolCert.sh myPool
 ```
 
 ![](../.gitbook/assets/image.png)
 
-you will get 2 reminders to upload the 2 generated metadata files (myPool.extended-metadata.jsonmyPool.metadata.json) to your webserver. **This is mandatory for your pool to be visible on Daedalus and other wallets:**
+## 3) Upload metadata files
 
-* Don't forget to upload your myPool.metadata.json file now to your webserver ([https://www.stakepool247.eu/xpool-testnet.metadata.json](https://www.stakepool247.eu/xpool-testnet.metadata.json)) before running 05b & 05c !
-* Don't forget to upload your myPool.extended-metadata.json file now to your webserver ([https://www.stakepool247.eu/xpool-testnet.extended.json](https://www.stakepool247.eu/xpool-testnet.extended.json)) before running 05b & 05c !
+The script generates two metadata files that **must be uploaded to your web server** before proceeding:
 
-so, let's rename them as we defined them in our config files a
+| File | Upload to |
+|------|-----------|
+| `myPool.metadata.json` | Your metadata URL (defined in pool.json) |
+| `myPool.extended-metadata.json` | Your extended metadata URL (defined in pool.json) |
 
+Rename and upload them:
+
+```bash
+cp myPool.metadata.json pool.metadata.json
+cp myPool.extended-metadata.json pool.extended.json
 ```
-cp myPool.metadata.json xpool-testnet.metadata.json
-cp myPool.extended-metadata.json xpool-testnet.extended.json
-```
 
-and upload to a webserver (either by ftp/sftp or any other means), **when it's done, let's proceed.**
+Upload via SCP, SFTP, or any method you prefer. Verify the URLs are accessible before continuing.
 
-Let's create a delegation certificate where we will delegate to our own pool
+## 4) Create the delegation certificate
 
-```
+Delegate to your own pool:
+
+```bash
 05b_genDelegationCert.sh myPool poolOwner
 ```
 
-this will generate the **poolOwner.deleg.cert**\
-\
-**before proceeding let's honor our pledge and send the pledged amount to poolOwner.paymet address, you can find the address where you have to send your funds in the poolOwner.payment.addr  file**
+## 5) Fund the pledge address
 
-```
-cat poolOwner.payment.addr 
+Send your pledged amount to the `poolOwner.payment` address:
+
+```bash
+cat poolOwner.payment.addr
 ```
 
 ![](<../.gitbook/assets/image (19).png>)
 
-send your pledge to that address and check in few seconds if it has arrived:
+Send your pledge to this address and verify it has arrived:
 
-```
+```bash
 01_queryAddress.sh poolOwner.payment
 ```
 
 ![](<../.gitbook/assets/image (25).png>)
 
-Great, fund arrived - let's move forward.
+## 6) Register the stake pool on-chain
 
+Register the pool. `myWallet` pays the transaction fee and 500 ADA deposit:
 
-
-**As the final task - let's register the stake pool on the blockchain**  (fees paid by the **myWallet**)
-
-```
+```bash
 05c_regStakepoolCert.sh myPool myWallet
 ```
 
 ![](<../.gitbook/assets/image (22).png>)
 
-So, if you did everything correctly in few minutes (sometimes hours) you will have your freshlly registred pool on Daedalus:
+After registration propagates (minutes to hours), the pool will appear in wallets like Daedalus:
 
 ![](<../.gitbook/assets/image (18).png>)

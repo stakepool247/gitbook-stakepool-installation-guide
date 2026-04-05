@@ -1,13 +1,13 @@
 ---
-description: Install cardano-node/cardano-cli 10.6.2 using official release binaries.
+description: Install cardano-node and cardano-cli 10.6.2 from official release binaries.
 ---
 
-# Cardano Node installation process (10.6.2)
+# Installing cardano-node 10.6.2
 
 This section installs **cardano-node 10.6.2** from official GitHub release artifacts.
 
 {% hint style="info" %}
-Path layout is kept compatible with existing SPO setups: `/home/cardano/cnode/{config,db,sockets,keys,logs,scripts}`.
+Path layout: `/home/cardano/cnode/{config,db,sockets,keys,logs,scripts}` — kept compatible with existing SPO setups.
 {% endhint %}
 
 ## 1) Download release artifacts
@@ -22,7 +22,7 @@ curl -L -o cardano-node-10.6.2-sha256sums.txt \
   https://github.com/IntersectMBO/cardano-node/releases/download/10.6.2/cardano-node-10.6.2-sha256sums.txt
 ```
 
-For **arm64** Linux, use:
+For **arm64** Linux:
 
 ```bash
 cd /tmp
@@ -43,14 +43,14 @@ Compare your tarball's checksum with the matching line in the official checksums
 
 ## 3) Install binaries
 
-Extract the tarball you downloaded (use the correct filename for your architecture):
+Extract the tarball (use the correct filename for your architecture):
 
 ```bash
 tar -xzf cardano-node-10.6.2-linux-*.tar.gz
 install -m 755 ./bin/cardano-node ./bin/cardano-cli $HOME/.local/bin/
 ```
 
-If the archive contains `cardano-submit-api` and `cardano-tracer`, you can install them too:
+Optionally install additional tools if present in the archive:
 
 ```bash
 [ -f ./bin/cardano-submit-api ] && install -m 755 ./bin/cardano-submit-api $HOME/.local/bin/
@@ -66,11 +66,11 @@ cardano-node --version
 cardano-cli --version
 ```
 
-You should see **cardano-node 10.6.2**. (`cardano-cli` version is released separately and may show a different semantic version, e.g. 10.15.x).
+You should see **cardano-node 10.6.2**. The `cardano-cli` version is released separately and may show a different version (e.g., 10.15.x).
 
 ## 5) Install network configuration files
 
-The release archive already contains current environment configs under `./share/`.
+The release archive contains environment configs under `./share/`:
 
 {% tabs %}
 {% tab title="Mainnet" %}
@@ -86,10 +86,8 @@ cp ./share/preprod/* $HOME/cnode/config/
 {% endtab %}
 {% endtabs %}
 
-You can also fetch the latest configs from the Intersect environments page:
-
-- https://book.play.dev.cardano.org/environments.html
+Latest configs are also available from the [Intersect environments page](https://book.play.dev.cardano.org/environments.html).
 
 ---
 
-✅ Done — cardano-node 10.6.2 binaries and configs are installed. Continue to the **Relay Configuration** section to set up and launch your node.
+Binaries and configs are installed. Continue to **Relay Configuration** to set up and launch your node.

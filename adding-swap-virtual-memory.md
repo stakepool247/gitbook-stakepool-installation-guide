@@ -1,85 +1,74 @@
 ---
-description: >-
-  To prevent system process from crashing because of out-of-memory issues it is
-  advised to add some extra space for swap memory.
+description: Add swap space to prevent out-of-memory crashes during node operation.
 ---
 
-# Adding SWAP (virtual ) memory
+# Configuring swap space
 
-> **Memory swapping** is a computer technology that enables an operating system to provide more **memory** to a running application or process than is available in physical random access **memory** (**RAM**).\
-> [https://www.enterprisestorageforum.com/hardware/what-is-memory-swapping/](https://www.enterprisestorageforum.com/hardware/what-is-memory-swapping/)
+Swap provides overflow memory on disk when physical RAM is exhausted. It prevents out-of-memory crashes but is significantly slower than real RAM.
 
-Swap is a space on a disk that is used when the amount of physical RAM memory, so let's add this to our Ubuntu server
+## Check existing swap
 
-## Before we start adding swap
-
-let's check if your system has already enabled the swap by executing the following command:
-
-```
+```bash
 swapon -s
 ```
 
 {% hint style="warning" %}
-if instead of an empty response you get something similar to this, then it means **you already have enabled swap space and you should skip this section** and move to the next one.
+If this shows an active swapfile, swap is already configured — skip to the next section.
 {% endhint %}
 
 ![Example of enabled swap](<.gitbook/assets/terminal-swap-swapon.png>)
 
+## Recommended swap size
+
+| Server RAM | Swap size |
+|-----------|-----------|
+| 4 -- 16 GB | 8 GB |
+| 16+ GB | 16 GB |
+
 {% hint style="info" %}
-The SWAP should not be seen as a replacement for physical memory (RAM). Since swap space is a section of the hard drive, it has a significantly slower speed than regular RAM. If your server constantly runs out of RAM, you should be adding more RAM to it
+Swap is not a replacement for physical RAM. If your server constantly uses swap, upgrade memory instead.
 {% endhint %}
 
-If you have 4-16GB of RAM then you should add 8 GB of SWAP space, for larger servers you can double that.
+## Create and enable swap
 
-1. let's start by creating a SWAP file of 8GB
+1. Create an 8 GB swap file:
 
-```
+```bash
 sudo fallocate -l 8G /swapfile
 ```
 
-2\. Let's change the default permissions so that only the system can read/write to this file
+2. Restrict permissions:
 
-```
+```bash
 sudo chmod 600 /swapfile
 ```
 
-3\. Creating swap area and enabling the swap space
+3. Initialize and enable the swap area:
 
-```
+```bash
 sudo mkswap /swapfile
 sudo swapon /swapfile
 ```
 
-4\. Let's add this to the system as a permanent solution (so it works also after rebooting the server)
+4. Make swap persistent across reboots:
 
-```
+```bash
 echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
 ```
 
-5\. let's check if the swap is enabled and working
+5. Verify swap is active:
 
-```
+```bash
 sudo swapon --show
+free -h
 ```
-
-now you can also check with the  `htop` command and you should see the used and total swap space
 
 ![](<.gitbook/assets/terminal-swap-show.png>)
 
-6\. Let's also tune swap behavior so the system prefers real RAM and only uses swap under pressure:
+6. Tune swap behavior:
 
-```
-# Add settings to sysctl.conf (persist across reboots)
+```bash
 echo 'vm.swappiness=10' | sudo tee -a /etc/sysctl.conf
 echo 'vm.vfs_cache_pressure=50' | sudo tee -a /etc/sysctl.conf
-
-# Apply immediately without reboot
 sudo sysctl -p
 ```
-
-
-
-
-
-
-

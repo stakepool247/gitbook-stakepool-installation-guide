@@ -2,13 +2,15 @@
 description: Prepare your server for Cardano Node 10.6.2 installation.
 ---
 
-# Getting ready to install Cardano Node (v10.6.2)
+# Prerequisites
 
-This page prepares a clean Ubuntu/Debian server for cardano-node **10.6.2**.
+Prepare a clean Ubuntu/Debian server for cardano-node **10.6.2**.
 
-> Recommended approach for operators: install official release binaries first (fast, reproducible), then move to source builds only if you need custom patches.
+{% hint style="info" %}
+For most operators, installing official release binaries is the fastest and most reproducible approach. Source builds are only needed for custom patches.
+{% endhint %}
 
-## 1) System update + required packages
+## 1) System update and required packages
 
 ```bash
 sudo apt-get update -y
@@ -20,14 +22,13 @@ sudo apt-get install -y \
   libsodium-dev
 ```
 
-## 2) Directory layout and env vars
+## 2) Directory layout and environment variables
 
 Run as your `cardano` user:
 
 ```bash
 mkdir -p $HOME/.local/bin
 
-# canonical cnode layout (kept for compatibility with existing users)
 cd $HOME
 mkdir -p cnode
 cd cnode
@@ -48,51 +49,47 @@ source $HOME/.bashrc
 uname -m
 ```
 
-Expected values:
-- `x86_64` → use linux-amd64 artifact
-- `aarch64` → use linux-arm64 artifact
+| Output | Artifact to download |
+|--------|---------------------|
+| `x86_64` | `linux-amd64` |
+| `aarch64` | `linux-arm64` |
 
 {% hint style="info" %}
-Why this matters: if architecture and binary mismatch, the node will not start (`Exec format error`). Always verify `uname -m` before downloading.
+If architecture and binary mismatch, the node will not start (`Exec format error`). Always verify before downloading.
 {% endhint %}
 
-## 4) (Optional) Source-build prerequisites
+## 4) Source-build prerequisites (optional)
 
-If you build from source instead of binary artifacts:
+Only needed if building from source instead of release binaries:
 
-- Use **GHC 9.6**
-- Use **Cabal 3.8+ or 3.12**
-- Use **libblst 0.3.14** (required for 10.6.2 source builds)
+| Dependency | Version |
+|-----------|---------|
+| GHC | 9.6 |
+| Cabal | 3.8+ or 3.12 |
+| libblst | 0.3.14 |
 
-For most operators, binary artifacts are preferred for speed and consistency.
+## 5) Firewall
 
-## 5) Firewall (recommended for production, optional for lab testing)
-
-By default, many Ubuntu/Debian servers have UFW **inactive**. Check first:
+Check whether UFW is active:
 
 ```bash
 sudo ufw status verbose
 ```
 
-If you are doing a quick local/lab test, you can keep firewall setup for later.
-
-If this is a production relay, enable UFW now with only required ports:
+For a **production relay**, enable UFW with the required ports:
 
 ```bash
-# allow SSH (change if your SSH port is custom)
 sudo ufw allow 22/tcp
-# allow relay port (default in this guide: 3001)
 sudo ufw allow 3001/tcp
-
 sudo ufw enable
 sudo ufw status verbose
 ```
 
 {% hint style="warning" %}
-For a **block producer**, do NOT expose BP port publicly. Keep BP reachable only from your relays (private network, WireGuard, or strict IP allowlist).
+For a **block producer**, do NOT expose the BP port publicly. Keep your BP reachable only from your relays (private network, WireGuard, or strict IP allowlist).
 {% endhint %}
 
-## 6) Quick sanity checks
+## 6) Sanity checks
 
 ```bash
 df -h
@@ -100,8 +97,8 @@ free -h
 nproc
 ```
 
-Before syncing mainnet, ensure storage headroom is healthy (300+ GB). 350+ GB is safer for long-term growth.
+Verify at least 300 GB of free storage (350+ GB recommended for long-term growth).
 
 {% hint style="info" %}
-If RAM pressure is high, swap can prevent crashes, but swap is much slower than real RAM. If you constantly hit swap, upgrade memory instead of relying on swap as a permanent fix.
+Swap can prevent OOM crashes, but it is much slower than real RAM. If your server consistently hits swap, upgrade memory rather than relying on swap as a permanent fix.
 {% endhint %}

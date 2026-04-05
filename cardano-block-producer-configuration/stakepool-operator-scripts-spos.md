@@ -1,120 +1,107 @@
 ---
-description: >-
-  As the Cardano Node management is getting more complicated I would recommend
-  using StakePool Operator Scripts (SPOS) (also known as Martin's Scripts -
-  ATADA Stake pool owner).
+description: Install and configure the StakePool Operator Scripts (SPOS) for pool management.
 ---
 
-# Installing the StakePool Operator Scripts (SPOS)
+# Installing SPOS (StakePool Operator Scripts)
 
-{% hint style="danger" %}
-You have to install these scripts  on your SECURE Server/Workstation/Virtual PC which is running Ubuntu and where you have successfully installed the Cardano Node
-
-We will be creating keys for your pledge wallet as well as keys for your StakePool. \
-ANYONE who has access to these keys will have FULL CONTROL over your wallets and Stake Pool. **Never put these keys on your online server.**
+{% hint style="warning" %}
+Install these scripts on a **secure, offline workstation** — not on your online relay or BP server. The keys generated here control your wallets and stake pool. Anyone with access to these keys has full control over your funds and pool.
 {% endhint %}
 
 {% hint style="info" %}
-For better security SPOS scripts allow you to generate all the keys and certificates on a PC that is offline (air-gapped) as well as using Hardware Wallets (this is not covered here)
+SPOS supports air-gapped (offline) key generation and hardware wallets (Trezor/Ledger) for maximum security.
 {% endhint %}
 
-Let's start by downloading packages that are used by the scripts
+## 1) Install dependencies
 
+```bash
+sudo apt update -y
+sudo apt install -y curl bc jq
 ```
-sudo apt update -y 
-sudo apt install -y curl bc jq 
-```
 
-Let us now download the scripts:
+## 2) Clone the SPOS repository
 
-```
-cd 
-mkdir -p git
-cd git
-
-# just in case we already have an older folder there - let's remove it
+```bash
+cd ~
+mkdir -p git && cd git
 rm -rf scripts
-
-# cloning the code from github
 git clone https://github.com/gitmachtl/scripts
-
 cd scripts
 ls -al
-
 ```
-
-as a result, you should see this
 
 <figure><img src="../.gitbook/assets/terminal-spos-ls.png" alt="SPOS scripts directory listing"><figcaption></figcaption></figure>
 
-let's copy the scripts to our bin folder, so we can call them from anywhere:
+## 3) Copy scripts to your PATH
 
 {% tabs %}
 {% tab title="Mainnet" %}
-```
+```bash
 cp cardano/mainnet/* ~/.local/bin/
-cd ~/.local/bin/
 ```
-
-Now we have to do a simple configuration so the script knows where to find files and the socket. We will place the configuration file in our home directory, so you don't have to edit files again when next time you decide to upgrade the scripts.
-
-```
-cat <<EOF > ~/.common.inc
-socket="/home/cardano/cnode/sockets/node.socket"
-
-genesisfile="/home/cardano/cnode/config/shelley-genesis.json"           #Shelley-Genesis path
-genesisfile_byron="/home/cardano/cnode/config/byron-genesis.json"       #Byron-Genesis path
-
-cardanocli="cardano-cli"        #Path to your cardano-cli you wanna use
-cardanonode="cardano-node"      #Path to your cardano-node you wanna use
-
-magicparam="--mainnet"  #choose "--mainnet" for mainnet or "--testnet-magic 1" for pre-prod
-addrformat="--mainnet"  #choose "--mainnet" for mainnet address format or "--testnet-magic 1" for pre-prod
-
-#--------- leave this next value until you have to change it for a testnet
-byronToShelleyEpochs=208 #208 for the mainnet, 4 for pre-prod
-EOF
-```
-
-
 {% endtab %}
 
-{% tab title="TestNet" %}
-```
+{% tab title="Testnet (pre-prod)" %}
+```bash
 cp cardano/testnet/* ~/.local/bin/
-cd ~/.local/bin/
 ```
+{% endtab %}
+{% endtabs %}
 
-Now we have to do a simple configuration so the script knows where to find files and the socket. We will place the configuration file in our home directory, so you don't have to edit files again when next time you decide to upgrade the script
+## 4) Create the SPOS configuration file
 
-```
+This tells the scripts where to find the node socket and genesis files. Placing it in your home directory means you do not need to reconfigure when upgrading scripts.
+
+{% tabs %}
+{% tab title="Mainnet" %}
+```bash
 cat <<EOF > ~/.common.inc
 socket="/home/cardano/cnode/sockets/node.socket"
 
-genesisfile="/home/cardano/cnode/config/shelley-genesis.json"           #Shelley-Genesis path
-genesisfile_byron="/home/cardano/cnode/config/byron-genesis.json"       #Byron-Genesis path
+genesisfile="/home/cardano/cnode/config/shelley-genesis.json"
+genesisfile_byron="/home/cardano/cnode/config/byron-genesis.json"
 
-cardanocli="cardano-cli"        #Path to your cardano-cli you wanna use
-cardanonode="cardano-node"      #Path to your cardano-node you wanna use
+cardanocli="cardano-cli"
+cardanonode="cardano-node"
 
-magicparam="--testnet-magic 1"  #choose "--mainnet" for mainnet or "--testnet-magic 1" for pre-prod
-addrformat="--testnet-magic 1"  #choose "--mainnet" for mainnet address format or "--testnet-magic 1" for pre-prod
+magicparam="--mainnet"
+addrformat="--mainnet"
 
-#--------- leave this next value until you have to change it for a testnet
-byronToShelleyEpochs=4 #208 for the mainnet, 4 for pre-prod
+byronToShelleyEpochs=208
+EOF
+```
+{% endtab %}
+
+{% tab title="Testnet (pre-prod)" %}
+```bash
+cat <<EOF > ~/.common.inc
+socket="/home/cardano/cnode/sockets/node.socket"
+
+genesisfile="/home/cardano/cnode/config/shelley-genesis.json"
+genesisfile_byron="/home/cardano/cnode/config/byron-genesis.json"
+
+cardanocli="cardano-cli"
+cardanonode="cardano-node"
+
+magicparam="--testnet-magic 1"
+addrformat="--testnet-magic 1"
+
+byronToShelleyEpochs=4
 EOF
 ```
 {% endtab %}
 {% endtabs %}
 
+## 5) Verify installation
 
-
-Let's check if you have succeeded:
-
+```bash
+00_common.sh
 ```
-00_common.sh 
-```
-
-if you see the following output, then you have successfully installed the scripts:
 
 <figure><img src="../.gitbook/assets/terminal-spos-common.png" alt="00_common.sh showing cli 10.15.0.0 / node 10.6.2"><figcaption></figcaption></figure>
+
+The output shows the detected `cardano-cli` and `cardano-node` versions, the operating mode, and the configured network.
+
+{% hint style="info" %}
+The "Warning: Node-Socket does not exist" message is expected if the node is not running on this machine (e.g., on an offline workstation).
+{% endhint %}

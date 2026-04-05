@@ -4,7 +4,10 @@
 # https://cardano-node-installation.stakepool247.eu/
 #
 # Sets up a Cardano relay node on a fresh Ubuntu/Debian server.
-# Run as root:   sudo bash setup-relay.sh
+#
+# Usage:
+#   sudo bash setup-relay.sh              # mainnet (default)
+#   sudo bash setup-relay.sh --preprod    # pre-prod testnet
 #
 # What this does (matches the guide step by step):
 #   1. Creates the 'cardano' user
@@ -14,10 +17,7 @@
 #   5. Downloads + installs cardano-node binaries
 #   6. Downloads network config files
 #   7. Installs Mithril client (for fast blockchain sync)
-#   8. Creates + starts systemd service
-#
-# After this script completes, your relay will be syncing.
-# Use Mithril to bootstrap the blockchain faster (see guide).
+#   8. Creates systemd service (not started — you choose when)
 #
 set -euo pipefail
 
@@ -25,7 +25,14 @@ set -euo pipefail
 NODE_VERSION="10.6.2"
 NODE_PORT=3001
 CARDANO_USER="cardano"
-NETWORK="mainnet"   # change to "preprod" for testnet
+NETWORK="mainnet"
+
+for arg in "$@"; do
+  case "$arg" in
+    --preprod) NETWORK="preprod" ;;
+    --mainnet) NETWORK="mainnet" ;;
+  esac
+done
 
 # ─── Helpers ─────────────────────────────────────────────────────────
 GREEN='\033[0;32m'
@@ -48,9 +55,10 @@ if [[ $EUID -ne 0 ]]; then
   exit 1
 fi
 
+BANNER_NET=$(printf "%-7s" "$NETWORK")
 echo -e "${BLUE}╔══════════════════════════════════════════════════╗${NC}"
 echo -e "${BLUE}║  Cardano Relay Node Setup                       ║${NC}"
-echo -e "${BLUE}║  cardano-node ${NODE_VERSION}  |  Network: ${NETWORK}        ║${NC}"
+echo -e "${BLUE}║  cardano-node ${NODE_VERSION}  |  Network: ${BANNER_NET}     ║${NC}"
 echo -e "${BLUE}╚══════════════════════════════════════════════════╝${NC}"
 echo ""
 echo "OS:   $(lsb_release -ds 2>/dev/null || cat /etc/os-release | grep PRETTY_NAME | cut -d= -f2 | tr -d '"')"
@@ -186,7 +194,7 @@ MITHRIL_VER=$(run_as_cardano '$HOME/.local/bin/mithril-client --version' 2>&1 | 
 ok "$MITHRIL_VER"
 
 # ─── 8. Systemd service ─────────────────────────────────────────────
-step 8 "Creating and starting systemd service"
+step 8 "Creating systemd service"
 
 cat <<'UNIT' > /etc/systemd/system/cardano-node.service
 [Unit]
@@ -221,8 +229,7 @@ UNIT
 
 systemctl daemon-reload
 systemctl enable cardano-node.service >/dev/null
-systemctl start cardano-node.service
-ok "Service created, enabled, and started"
+ok "Service created and enabled (not started yet)"
 
 # ─── Done ────────────────────────────────────────────────────────────
 echo ""
@@ -230,17 +237,27 @@ echo -e "${GREEN}═════════════════════
 echo -e "${GREEN}  Relay node setup complete!${NC}"
 echo -e "${GREEN}══════════════════════════════════════════════════${NC}"
 echo ""
-echo "  Your relay node is now syncing from genesis."
-echo "  This will take a long time (days). To speed it up,"
-echo "  stop the node and use Mithril to bootstrap:"
+echo "  The node is installed but NOT started yet."
+echo "  Before starting, you may want to:"
 echo ""
-echo -e "  ${BLUE}sudo systemctl stop cardano-node${NC}"
-echo -e "  ${BLUE}su - cardano${NC}"
-echo -e "  ${BLUE}# Then follow the Mithril download section in the guide${NC}"
+echo "  1) Edit topology:    nano /home/cardano/cnode/config/topology.json"
+echo "  2) Download the blockchain with Mithril (much faster than syncing from genesis):"
+echo ""
+echo -e "     ${BLUE}su - cardano${NC}"
+echo -e "     ${BLUE}# Follow the Mithril download section in the guide${NC}"
+echo ""
+echo "  When ready, start the node:"
+echo ""
+echo -e "     ${BLUE}sudo systemctl start cardano-node${NC}"
 echo ""
 echo "  Useful commands:"
 echo "    Check logs:     journalctl -u cardano-node -f"
-echo "    Check sync:     su - cardano -c 'cardano-cli query tip --${NETWORK}'"
+if [[ "$NETWORK" == "mainnet" ]]; then
+  CLI_NET="--mainnet"
+else
+  CLI_NET="--testnet-magic 1"
+fi
+echo "    Check sync:     su - cardano -c 'cardano-cli query tip ${CLI_NET}'"
 echo "    Stop node:      sudo systemctl stop cardano-node"
 echo "    Restart node:   sudo systemctl restart cardano-node"
 echo ""

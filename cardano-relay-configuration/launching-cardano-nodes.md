@@ -49,7 +49,7 @@ sudo systemctl enable cardano-node.service
 sudo systemctl start cardano-node.service
 ```
 
-![creating and enabling cardano node as system service](<../.gitbook/assets/CleanShot 2021-08-30 at 15.23.30.png>)
+![creating and enabling cardano node as system service](<../.gitbook/assets/terminal-systemd-enable.png>)
 
 Now let's check if our cardano node process is running!
 
@@ -57,7 +57,7 @@ Now let's check if our cardano node process is running!
 journalctl -u cardano-node.service -f -o cat
 ```
 
-<figure><img src="../.gitbook/assets/CleanShot 2023-05-15 at 20.16.13@2x.jpg" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/terminal-journalctl-sync.png" alt="journalctl showing cardano-node syncing"><figcaption></figcaption></figure>
 
 **We have set up your first relay node!** &#x20;
 
@@ -69,7 +69,7 @@ journalctl -u cardano-node.service -f -o cat
 
 Ideally, run 2 relay nodes for each block producer:
 
-![](<../.gitbook/assets/image (11).png>)
+![](<../.gitbook/assets/topology-diagram.png>)
 
 ### Topology: connecting your relays to your BP
 

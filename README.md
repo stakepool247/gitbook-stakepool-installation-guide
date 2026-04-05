@@ -56,6 +56,12 @@ This automates every step from this guide: user creation, packages, cardano-node
 
 This guide is based on official Cardano docs + operator best practice, with practical commands and safer defaults.
 
+{% hint style="success" %}
+**Contribute to this guide:** This documentation is open source! If you find errors, have improvements, or want to add content, submit a pull request or open an issue on GitHub:
+
+[https://github.com/stakepool247/gitbook-stakepool-installation-guide](https://github.com/stakepool247/gitbook-stakepool-installation-guide)
+{% endhint %}
+
 {% hint style="info" %}
 Useful communities:
 

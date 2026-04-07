@@ -17,7 +17,8 @@
 #   5. Downloads + installs cardano-node binaries
 #   6. Downloads network config files + configures DB backend
 #   7. Installs Mithril client (for fast blockchain sync)
-#   8. Creates systemd service (not started — you choose when)
+#   8. Installs gLiveView monitoring tool
+#   9. Creates systemd service (not started — you choose when)
 #
 set -euo pipefail
 
@@ -52,7 +53,7 @@ step()  { echo -e "\n${BLUE}[$1/${TOTAL_STEPS}] $2${NC}"; }
 ok()    { echo -e "  ${GREEN}done${NC} — $1"; }
 warn()  { echo -e "  ${YELLOW}$1${NC}"; }
 die()   { echo -e "  ${RED}ERROR: $1${NC}"; exit 1; }
-TOTAL_STEPS=8
+TOTAL_STEPS=9
 
 run_as_cardano() { su - "$CARDANO_USER" -c "$1"; }
 
@@ -302,8 +303,30 @@ rm -f mithril.tar.gz mithril-client mithril-signer mithril-aggregator mithril-re
 MITHRIL_VER=$(run_as_cardano '$HOME/.local/bin/mithril-client --version' 2>&1 | head -1)
 ok "$MITHRIL_VER"
 
-# ─── 8. Systemd service ─────────────────────────────────────────────
-step 8 "Creating systemd service"
+# ─── 8. gLiveView monitoring ─────────────────────────────────────────
+step 8 "Installing gLiveView monitoring tool"
+
+CNODE_HOME="/home/cardano/cnode"
+
+run_as_cardano '
+curl -sL -o $HOME/.local/bin/gLiveView.sh \
+  https://raw.githubusercontent.com/cardano-community/guild-operators/refs/heads/alpha/scripts/cnode-helper-scripts/gLiveView.sh
+curl -sL -o $HOME/.local/bin/env \
+  https://raw.githubusercontent.com/cardano-community/guild-operators/refs/heads/alpha/scripts/cnode-helper-scripts/env
+chmod 755 $HOME/.local/bin/gLiveView.sh
+'
+
+# Configure env for our paths
+sed -i "s|#CNODE_HOME=.*|CNODE_HOME=\"${CNODE_HOME}\"|" /home/cardano/.local/bin/env
+sed -i "s|#CNODE_PORT=.*|CNODE_PORT=${NODE_PORT}|" /home/cardano/.local/bin/env
+sed -i 's|#CONFIG=.*|CONFIG="${CNODE_HOME}/config/config.json"|' /home/cardano/.local/bin/env
+sed -i 's|#SOCKET=.*|SOCKET="${CNODE_HOME}/sockets/node.socket"|' /home/cardano/.local/bin/env
+sed -i 's|#TOPOLOGY=.*|TOPOLOGY="${CNODE_HOME}/config/topology.json"|' /home/cardano/.local/bin/env
+
+ok "gLiveView installed (run 'gLiveView.sh' when node is running)"
+
+# ─── 9. Systemd service ─────────────────────────────────────────────
+step 9 "Creating systemd service"
 
 cat <<'UNIT' > /etc/systemd/system/cardano-node.service
 [Unit]
@@ -384,6 +407,7 @@ echo -e "     ${BLUE}sudo systemctl start cardano-node${NC}"
 echo -e "     ${BLUE}journalctl -u cardano-node -f${NC}  # watch it come up"
 echo ""
 echo "  Useful commands:"
+echo "    Monitor node:   gLiveView.sh"
 echo "    Check logs:     journalctl -u cardano-node -f"
 echo "    Check sync:     su - cardano -c 'cardano-cli query tip ${CLI_NET} --socket-path ~/cnode/sockets/node.socket'"
 echo "    Stop node:      sudo systemctl stop cardano-node"

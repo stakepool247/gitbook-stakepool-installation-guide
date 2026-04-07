@@ -17,6 +17,7 @@
 * [Relay configuration](cardano-relay-configuration/cardano-node-configuration.md)
 * [Downloading the blockchain](cardano-relay-configuration/downloading-cardano-blockchain.md)
 * [Launching the relay node](cardano-relay-configuration/launching-cardano-nodes.md)
+* [Monitoring with gLiveView](cardano-relay-configuration/monitoring-with-gliveview.md)
 
 ## Cardano Block Producer Configuration
 

@@ -11,6 +11,7 @@ description: Install gLiveView for real-time terminal-based monitoring of your C
 Download gLiveView and its environment config file:
 
 ```bash
+mkdir -p $HOME/.local/logs
 curl -sL -o $HOME/.local/bin/gLiveView.sh \
   https://raw.githubusercontent.com/cardano-community/guild-operators/refs/heads/alpha/scripts/cnode-helper-scripts/gLiveView.sh
 curl -sL -o $HOME/.local/bin/env \

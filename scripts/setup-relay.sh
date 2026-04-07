@@ -309,6 +309,7 @@ step 8 "Installing gLiveView monitoring tool"
 CNODE_HOME="/home/cardano/cnode"
 
 run_as_cardano '
+mkdir -p $HOME/.local/logs
 curl -sL -o $HOME/.local/bin/gLiveView.sh \
   https://raw.githubusercontent.com/cardano-community/guild-operators/refs/heads/alpha/scripts/cnode-helper-scripts/gLiveView.sh
 curl -sL -o $HOME/.local/bin/env \

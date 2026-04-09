@@ -17,6 +17,7 @@ Upgrading from an older release? See the [Upgrade Guide](cardano-node-upgrades/u
 Get a relay node installed in minutes with our interactive setup script:
 
 ```bash
+sudo apt update && sudo apt install -y curl
 curl -sL -o setup-relay.sh \
   https://raw.githubusercontent.com/stakepool247/gitbook-stakepool-installation-guide/main/scripts/setup-relay.sh
 sudo bash setup-relay.sh

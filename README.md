@@ -27,6 +27,10 @@ The script lets you choose your network, node version, and DB backend via a TUI 
 
 Prefer to understand each step? Follow the guide below.
 
+{% hint style="info" %}
+**Rather not run the servers yourself?** [StakePool247](https://stakepool247.io/) sets up, hosts and operates Cardano stake pools for their owners. You keep the pool and the pledge; we run the block producer and relays. See the [managed stake pool service](https://stakepool247.io/cardano/create-a-new-pool/).
+{% endhint %}
+
 ---
 
 ## What you'll need
@@ -73,6 +77,7 @@ Same architecture, lighter requirements: 2 vCPU, 16 GB RAM, 150+ GB SSD.
 | | |
 |---|---|
 | **StakePool247 Support** | [t.me/StakePool247help](https://t.me/StakePool247help) |
+| **Managed stake pools** | [stakepool247.io](https://stakepool247.io/) — we operate the pool for you |
 | **Cardano SPO Workgroup** | [t.me/CardanoStakePoolWorkgroup](https://t.me/CardanoStakePoolWorkgroup) |
 | **Community Tech Support** | [t.me/CardanoCommunityTechSupport](https://t.me/CardanoCommunityTechSupport) |
 

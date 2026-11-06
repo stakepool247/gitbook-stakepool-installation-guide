@@ -29,3 +29,8 @@
 ## Cardano Node Upgrades
 
 * [Upgrade to 10.6.2](cardano-node-upgrades/upgrade-to-10.6.2.md)
+
+## Prefer a managed pool?
+
+* [StakePool247 management service](https://stakepool247.io/cardano/create-a-new-pool/)
+* [Migrate an existing pool](https://stakepool247.io/cardano/migrate-existing-pool/)
